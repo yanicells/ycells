@@ -3,86 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mental Health Matters</title>
+    <title>6 & 7 - Interactive Motion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #050505;
+            --c1: #38bdf8; /* Sky Blue */
+            --c2: #f472b6; /* Pink */
+            --text: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
             margin: 0;
-            padding: 0;
-            font-family: sans-serif;
-            background: white;
-            color: black;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            text-align: center;
+            overflow: hidden;
+            transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 2rem;
-            font-weight: normal;
+
+        .glow-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.3;
+            transition: background 0.8s ease;
         }
-        #meme-display {
-            font-size: 8rem;
-            height: 200px;
+
+        .stage {
+            position: relative;
+            z-index: 1;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            gap: 4rem;
+            align-items: flex-end;
+            padding-bottom: 5vh;
         }
+
+        .number-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: min(35vw, 350px);
+        }
+
+        .number {
+            font-size: min(45vw, 450px);
+            line-height: 0.8;
+            font-weight: 900;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateY(0) scale(1);
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.05));
+        }
+
+        .n6 { color: var(--c1); }
+        .n7 { color: var(--c2); }
+
+        .number.up {
+            transform: translateY(-150px) scale(1.15) rotate(2deg);
+        }
+        
+        .n7.up {
+            transform: translateY(-150px) scale(1.15) rotate(-2deg);
+        }
+
+        .shadow {
+            width: 120px;
+            height: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 50%;
+            filter: blur(10px);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: scale(1);
+            opacity: 0.4;
+            margin-top: 10px;
+        }
+
+        .number.up + .shadow {
+            transform: scale(1.8);
+            opacity: 0.15;
+            filter: blur(15px);
+        }
+
         .instruction {
             position: fixed;
-            bottom: 20px;
-            color: #666;
-            font-size: 0.9rem;
+            bottom: 4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6em;
+            font-size: 0.75rem;
+            font-weight: 300;
+            opacity: 0.3;
+            animation: breathe 3s infinite ease-in-out;
+            pointer-events: none;
         }
-        .buttons {
-            margin-top: 2rem;
-            display: flex;
-            gap: 10px;
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.1; transform: translateY(0); }
+            50% { opacity: 0.4; transform: translateY(-5px); }
         }
-        button {
-            padding: 10px 20px;
-            cursor: pointer;
-            border: 1px solid black;
-            background: white;
+
+        /* State specific styles */
+        body.six-active { background: #02080c; }
+        body.six-active .glow-overlay { 
+            background: radial-gradient(circle at 35% 50%, rgba(56, 189, 248, 0.15) 0%, transparent 60%); 
         }
-        button:active {
-            background: black;
-            color: white;
+        body.six-active .n6 {
+            text-shadow: 0 0 60px rgba(56, 189, 248, 0.5), 0 0 120px rgba(56, 189, 248, 0.2);
+        }
+
+        body.seven-active { background: #0c0208; }
+        body.seven-active .glow-overlay { 
+            background: radial-gradient(circle at 65% 50%, rgba(244, 114, 182, 0.15) 0%, transparent 60%); 
+        }
+        body.seven-active .n7 {
+            text-shadow: 0 0 60px rgba(244, 114, 182, 0.5), 0 0 120px rgba(244, 114, 182, 0.2);
+        }
+
+        @media (max-width: 600px) {
+            .stage { gap: 1rem; }
+            .number { font-size: min(40vw, 200px); }
+            .number.up { transform: translateY(-80px) scale(1.1); }
         }
     </style>
 </head>
 <body>
-    <h1 id="text">Mental Health Matters</h1>
+    <div class="glow-overlay"></div>
     
-    <div id="meme-display">👋</div>
-
-    <div class="buttons">
-        <button onclick="show(6)">6</button>
-        <button onclick="show(7)">7</button>
+    <div class="stage">
+        <div class="number-group">
+            <div id="six" class="number n6">6</div>
+            <div class="shadow"></div>
+        </div>
+        <div class="number-group">
+            <div id="seven" class="number n7">7</div>
+            <div class="shadow"></div>
+        </div>
     </div>
 
-    <div class="instruction">Press 6 or 7 on your keyboard</div>
+    <div class="instruction">Press any key</div>
 
     <script>
-        const display = document.getElementById('meme-display');
-        const text = document.getElementById('text');
+        const six = document.getElementById('six');
+        const seven = document.getElementById('seven');
+        const body = document.body;
+        
+        // 0: idle, 1: 6 is up, 2: 7 is up
+        let state = 0;
 
-        function show(num) {
-            if (num === 6) {
-                display.innerText = '🖐️☝️'; // 5 + 1 = 6
-                text.innerText = 'Mental Health Matters (6)';
-            } else if (num === 7) {
-                display.innerText = '🖐️✌️'; // 5 + 2 = 7
-                text.innerText = 'Mental Health Matters (7)';
+        function updateDisplay() {
+            if (state === 1) {
+                six.classList.add('up');
+                seven.classList.remove('up');
+                body.classList.add('six-active');
+                body.classList.remove('seven-active');
+            } else if (state === 2) {
+                six.classList.remove('up');
+                seven.classList.add('up');
+                body.classList.remove('six-active');
+                body.classList.add('seven-active');
             }
         }
 
+        function trigger() {
+            // Toggle between 6 and 7
+            if (state === 1) {
+                state = 2;
+            } else {
+                state = 1;
+            }
+            updateDisplay();
+        }
+
+        // Keyboard interaction
         window.addEventListener('keydown', (e) => {
-            if (e.key === '6') show(6);
-            if (e.key === '7') show(7);
+            // Avoid repeating on hold if desired, but here it feels good
+            trigger();
         });
+
+        // Click/Touch interaction
+        window.addEventListener('click', () => {
+            trigger();
+        });
+
+        // Initialize with a small delay for entrance
+        setTimeout(() => {
+            // Maybe start with one up? Or just wait for user.
+            // Let's wait for user input as requested.
+        }, 500);
     </script>
 </body>
 </html>
