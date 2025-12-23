@@ -3,38 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mental Health Matters | Your Well-being is Priority</title>
-    <meta name="description" content="A gentle reminder that your mental health matters. Take a breath, seek support, and prioritize your well-being.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <title>Mental Health Matters</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            background: white;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            font-weight: normal;
+        }
+        #meme-display {
+            font-size: 8rem;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .instruction {
+            position: fixed;
+            bottom: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .buttons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid black;
+            background: white;
+        }
+        button:active {
+            background: black;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <main class="container">
-        <section class="hero">
-            <div class="content">
-                <h1 id="main-title">Mental Health <span class="highlight">Matters</span></h1>
-                <p class="subtitle">Your journey is valid. Your feelings are real. You are enough.</p>
-                <div class="cta-group">
-                    <a href="#" class="btn btn-primary" id="btn-explore">Take a Breath</a>
-                    <a href="#" class="btn btn-secondary" id="btn-support">Find Support</a>
-                </div>
-            </div>
-            <div class="floating-shapes">
-                <div class="shape shape-1"></div>
-                <div class="shape shape-2"></div>
-                <div class="shape shape-3"></div>
-            </div>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2025 Kindness & Care. Take care of yourself.</p>
-    </footer>
+    <h1 id="text">Mental Health Matters</h1>
+    
+    <div id="meme-display">👋</div>
+
+    <div class="buttons">
+        <button onclick="show(6)">6</button>
+        <button onclick="show(7)">7</button>
+    </div>
+
+    <div class="instruction">Press 6 or 7 on your keyboard</div>
+
     <script>
-        document.getElementById('btn-explore').addEventListener('click', (e) => {
-            e.preventDefault();
-            alert('Take a deep breath... Inhale for 4, Hold for 4, Exhale for 4. You are doing great.');
+        const display = document.getElementById('meme-display');
+        const text = document.getElementById('text');
+
+        function show(num) {
+            if (num === 6) {
+                display.innerText = '🖐️☝️'; // 5 + 1 = 6
+                text.innerText = 'Mental Health Matters (6)';
+            } else if (num === 7) {
+                display.innerText = '🖐️✌️'; // 5 + 2 = 7
+                text.innerText = 'Mental Health Matters (7)';
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === '6') show(6);
+            if (e.key === '7') show(7);
         });
     </script>
 </body>
