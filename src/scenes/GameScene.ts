@@ -40,7 +40,7 @@ export class GameScene extends Phaser.Scene {
       0,
       0,
       this.tileMap.getWorldWidth(),
-      this.tileMap.getWorldHeight()
+      this.tileMap.getWorldHeight(),
     );
     this.cameras.main.startFollow(this.player.getSprite(), true, lerpX, lerpY);
     this.cameras.main.setZoom(zoom);

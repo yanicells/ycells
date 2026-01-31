@@ -1,11 +1,17 @@
 import Phaser from "phaser";
-import { TileType, TILE_SIZE, TILE_SCALE, TILE_TEXTURES, isCollidable } from "../config/TileConfig";
+import {
+  TileType,
+  TILE_SIZE,
+  TILE_SCALE,
+  TILE_TEXTURES,
+  isCollidable,
+} from "../config/TileConfig";
 
 export class TileMap {
   private scene: Phaser.Scene;
   private data: TileType[][] = [];
   private collisionGroup: Phaser.Physics.Arcade.StaticGroup;
-  
+
   public width: number = 0;
   public height: number = 0;
 
@@ -29,7 +35,10 @@ export class TileMap {
   private parseMapData(text: string): void {
     const lines = text.trim().split("\n");
     this.data = lines.map((line) =>
-      line.trim().split(/\s+/).map((num) => parseInt(num, 10) as TileType)
+      line
+        .trim()
+        .split(/\s+/)
+        .map((num) => parseInt(num, 10) as TileType),
     );
     this.height = this.data.length;
     this.width = this.data[0]?.length || 0;
@@ -58,7 +67,9 @@ export class TileMap {
     }
 
     // Create the tile sprite
-    const tile = this.scene.add.image(posX, posY, textureKey).setScale(TILE_SCALE);
+    const tile = this.scene.add
+      .image(posX, posY, textureKey)
+      .setScale(TILE_SCALE);
 
     // Set depth - trees should render above player when player is above them
     if (tileType === TileType.TREE) {

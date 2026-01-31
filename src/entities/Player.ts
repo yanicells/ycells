@@ -27,11 +27,11 @@ export class Player {
     // Set up physics body
     this.sprite.body!.setSize(
       GameConfig.player.bodyWidth,
-      GameConfig.player.bodyHeight
+      GameConfig.player.bodyHeight,
     );
     this.sprite.body!.setOffset(
       GameConfig.player.bodyOffsetX,
-      GameConfig.player.bodyOffsetY
+      GameConfig.player.bodyOffsetY,
     );
 
     // Setup controls
@@ -125,7 +125,7 @@ export class Player {
   }
 
   public setCollidesWith(
-    group: Phaser.Physics.Arcade.StaticGroup
+    group: Phaser.Physics.Arcade.StaticGroup,
   ): Phaser.Physics.Arcade.Collider {
     return this.scene.physics.add.collider(this.sprite, group);
   }
