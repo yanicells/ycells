@@ -1,4 +1,12 @@
 import Phaser from "phaser";
+import {
+  MAP_DATA,
+  MAP_WIDTH,
+  MAP_HEIGHT,
+  TILE_SIZE,
+  TILE_TYPES,
+  COLLISION_TILES,
+} from "../data/map";
 
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite;
@@ -9,9 +17,8 @@ export class GameScene extends Phaser.Scene {
     S: Phaser.Input.Keyboard.Key;
     D: Phaser.Input.Keyboard.Key;
   };
-  private worldWidth = 2048;
-  private worldHeight = 2048;
-  private moveSpeed = 200;
+  private collisionLayer!: Phaser.Physics.Arcade.StaticGroup;
+  private moveSpeed = 150;
   private currentDirection = "down";
 
   constructor() {
@@ -22,22 +29,18 @@ export class GameScene extends Phaser.Scene {
     // Create player animations
     this.createAnimations();
 
-    // Set world bounds
-    this.physics.world.setBounds(0, 0, this.worldWidth, this.worldHeight);
-
-    // Create the tiled grass background
-    this.createBackground();
-
-    // Create world objects (trees, rocks, houses, flowers)
-    this.createWorldObjects();
+    // Create the tilemap
+    this.createTilemap();
 
     // Create player
     this.createPlayer();
 
     // Setup camera
-    this.cameras.main.setBounds(0, 0, this.worldWidth, this.worldHeight);
-    this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
-    this.cameras.main.setZoom(1);
+    const worldWidth = MAP_WIDTH * TILE_SIZE;
+    const worldHeight = MAP_HEIGHT * TILE_SIZE;
+    this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
+    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+    this.cameras.main.setZoom(2);
 
     // Setup controls
     this.cursors = this.input.keyboard!.createCursorKeys();
@@ -48,33 +51,36 @@ export class GameScene extends Phaser.Scene {
       D: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D),
     };
 
+    // Add collision between player and collision layer
+    this.physics.add.collider(this.player, this.collisionLayer);
+
     // Add UI text
     this.add
       .text(16, 16, "Use WASD or Arrow Keys to explore!", {
-        font: "18px monospace",
+        font: "14px monospace",
         color: "#ffffff",
         backgroundColor: "#000000",
-        padding: { x: 10, y: 5 },
+        padding: { x: 8, y: 4 },
       })
       .setScrollFactor(0)
       .setDepth(10000);
 
     // Add coordinates display
     const coordsText = this.add
-      .text(16, 50, "", {
-        font: "14px monospace",
+      .text(16, 42, "", {
+        font: "12px monospace",
         color: "#00ff88",
         backgroundColor: "#000000",
-        padding: { x: 10, y: 5 },
+        padding: { x: 8, y: 4 },
       })
       .setScrollFactor(0)
       .setDepth(10000);
 
     // Update coordinates text every frame
     this.events.on("update", () => {
-      coordsText.setText(
-        `Position: (${Math.floor(this.player.x)}, ${Math.floor(this.player.y)})`,
-      );
+      const tileX = Math.floor(this.player.x / TILE_SIZE);
+      const tileY = Math.floor(this.player.y / TILE_SIZE);
+      coordsText.setText(`Tile: (${tileX}, ${tileY})`);
     });
   }
 
@@ -137,75 +143,79 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  createBackground() {
-    // Create a tiled grass background
-    for (let x = 0; x < this.worldWidth; x += 64) {
-      for (let y = 0; y < this.worldHeight; y += 64) {
-        const grass = this.add.image(x + 32, y + 32, "grass");
-        grass.setDepth(0);
-        // Add slight color variation for visual interest
-        if (Math.random() > 0.7) {
-          grass.setTint(0x5a9c6a);
+  createTilemap() {
+    // Create collision layer group
+    this.collisionLayer = this.physics.add.staticGroup();
+
+    // Map tile type to texture key
+    const tileTextures: Record<number, string> = {
+      [TILE_TYPES.GRASS]: "tile_grass",
+      [TILE_TYPES.WATER]: "tile_water",
+      [TILE_TYPES.SAND]: "tile_sand",
+      [TILE_TYPES.EARTH]: "tile_earth",
+      [TILE_TYPES.WALL]: "tile_wall",
+      [TILE_TYPES.TREE]: "tile_tree",
+    };
+
+    // Render the map
+    for (let y = 0; y < MAP_HEIGHT; y++) {
+      for (let x = 0; x < MAP_WIDTH; x++) {
+        const tileType = MAP_DATA[y][x];
+        const textureKey = tileTextures[tileType];
+
+        const posX = x * TILE_SIZE + TILE_SIZE / 2;
+        const posY = y * TILE_SIZE + TILE_SIZE / 2;
+
+        // For trees, first place grass underneath
+        if (tileType === TILE_TYPES.TREE) {
+          this.add.image(posX, posY, "tile_grass").setDepth(0);
+        }
+
+        // Create the tile
+        const tile = this.add.image(posX, posY, textureKey);
+
+        // Set depth - trees should be above player when player is above them
+        if (tileType === TILE_TYPES.TREE) {
+          tile.setDepth(posY + TILE_SIZE);
+        } else {
+          tile.setDepth(0);
+        }
+
+        // Add collision for blocking tiles
+        if (COLLISION_TILES.includes(tileType)) {
+          const collider = this.collisionLayer.create(posX, posY, textureKey);
+          collider.setVisible(false); // Hide the collision sprite (we already have the visual tile)
+          collider.body.setSize(TILE_SIZE, TILE_SIZE);
+          collider.refreshBody();
         }
       }
     }
   }
 
-  createWorldObjects() {
-    // Create scattered trees
-    for (let i = 0; i < 50; i++) {
-      const x = Phaser.Math.Between(100, this.worldWidth - 100);
-      const y = Phaser.Math.Between(100, this.worldHeight - 100);
-      const tree = this.add.image(x, y, "tree");
-      tree.setDepth(y); // Depth sorting based on Y position
-    }
-
-    // Create scattered rocks
-    for (let i = 0; i < 30; i++) {
-      const x = Phaser.Math.Between(50, this.worldWidth - 50);
-      const y = Phaser.Math.Between(50, this.worldHeight - 50);
-      const rock = this.add.image(x, y, "rock");
-      rock.setDepth(y);
-      rock.setScale(0.8 + Math.random() * 0.4);
-    }
-
-    // Create some houses in clusters
-    const housePositions = [
-      { x: 300, y: 300 },
-      { x: 500, y: 350 },
-      { x: 1500, y: 800 },
-      { x: 1600, y: 900 },
-      { x: 800, y: 1500 },
-      { x: 1800, y: 400 },
-    ];
-
-    housePositions.forEach((pos) => {
-      const house = this.add.image(pos.x, pos.y, "house");
-      house.setDepth(pos.y);
-    });
-
-    // Create flower patches
-    for (let i = 0; i < 80; i++) {
-      const x = Phaser.Math.Between(50, this.worldWidth - 50);
-      const y = Phaser.Math.Between(50, this.worldHeight - 50);
-      const flower = this.add.image(x, y, "flower");
-      flower.setDepth(y);
-      // Random flower colors
-      const colors = [0xff69b4, 0xff6347, 0xffd700, 0x9370db, 0x00ced1];
-      flower.setTint(colors[Math.floor(Math.random() * colors.length)]);
-    }
-  }
-
   createPlayer() {
-    // Start player in the center of the world
-    this.player = this.physics.add.sprite(
-      this.worldWidth / 2,
-      this.worldHeight / 2,
-      "player_down_1",
-    );
-    this.player.setScale(3);
-    this.player.setCollideWorldBounds(true);
-    this.player.setDepth(1000); // Player always on top for now
+    // Find a valid starting position (first grass tile from center)
+    let startX = Math.floor(MAP_WIDTH / 2);
+    let startY = Math.floor(MAP_HEIGHT / 2);
+
+    // Make sure we start on a walkable tile
+    while (COLLISION_TILES.includes(MAP_DATA[startY][startX])) {
+      startX++;
+      if (startX >= MAP_WIDTH - 1) {
+        startX = 1;
+        startY++;
+      }
+    }
+
+    const posX = startX * TILE_SIZE + TILE_SIZE / 2;
+    const posY = startY * TILE_SIZE + TILE_SIZE / 2;
+
+    this.player = this.physics.add.sprite(posX, posY, "player_down_1");
+    this.player.setScale(1.5);
+    this.player.setDepth(posY);
+
+    // Set up player physics body
+    this.player.body!.setSize(12, 12);
+    this.player.body!.setOffset(2, 4);
   }
 
   update() {
@@ -252,7 +262,7 @@ export class GameScene extends Phaser.Scene {
       this.player.anims.play(`idle_${this.currentDirection}`, true);
     }
 
-    // Update player depth based on Y position for proper layering
+    // Update player depth based on Y position for proper layering with trees
     this.player.setDepth(this.player.y);
   }
 }
