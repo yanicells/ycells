@@ -12,12 +12,16 @@ export class GameScene extends Phaser.Scene {
   private worldWidth = 2048;
   private worldHeight = 2048;
   private moveSpeed = 200;
+  private currentDirection = "down";
 
   constructor() {
     super({ key: "GameScene" });
   }
 
   create() {
+    // Create player animations
+    this.createAnimations();
+
     // Set world bounds
     this.physics.world.setBounds(0, 0, this.worldWidth, this.worldHeight);
 
@@ -71,6 +75,65 @@ export class GameScene extends Phaser.Scene {
       coordsText.setText(
         `Position: (${Math.floor(this.player.x)}, ${Math.floor(this.player.y)})`,
       );
+    });
+  }
+
+  createAnimations() {
+    // Down animation
+    this.anims.create({
+      key: "walk_down",
+      frames: [{ key: "player_down_1" }, { key: "player_down_2" }],
+      frameRate: 8,
+      repeat: -1,
+    });
+
+    // Up animation
+    this.anims.create({
+      key: "walk_up",
+      frames: [{ key: "player_up_1" }, { key: "player_up_2" }],
+      frameRate: 8,
+      repeat: -1,
+    });
+
+    // Left animation
+    this.anims.create({
+      key: "walk_left",
+      frames: [{ key: "player_left_1" }, { key: "player_left_2" }],
+      frameRate: 8,
+      repeat: -1,
+    });
+
+    // Right animation
+    this.anims.create({
+      key: "walk_right",
+      frames: [{ key: "player_right_1" }, { key: "player_right_2" }],
+      frameRate: 8,
+      repeat: -1,
+    });
+
+    // Idle animations (just first frame of each direction)
+    this.anims.create({
+      key: "idle_down",
+      frames: [{ key: "player_down_1" }],
+      frameRate: 1,
+    });
+
+    this.anims.create({
+      key: "idle_up",
+      frames: [{ key: "player_up_1" }],
+      frameRate: 1,
+    });
+
+    this.anims.create({
+      key: "idle_left",
+      frames: [{ key: "player_left_1" }],
+      frameRate: 1,
+    });
+
+    this.anims.create({
+      key: "idle_right",
+      frames: [{ key: "player_right_1" }],
+      frameRate: 1,
     });
   }
 
@@ -138,8 +201,9 @@ export class GameScene extends Phaser.Scene {
     this.player = this.physics.add.sprite(
       this.worldWidth / 2,
       this.worldHeight / 2,
-      "player",
+      "player_down_1",
     );
+    this.player.setScale(3);
     this.player.setCollideWorldBounds(true);
     this.player.setDepth(1000); // Player always on top for now
   }
@@ -151,17 +215,26 @@ export class GameScene extends Phaser.Scene {
     // Handle movement
     let velocityX = 0;
     let velocityY = 0;
+    let isMoving = false;
 
     if (this.cursors.left.isDown || this.wasd.A.isDown) {
       velocityX = -this.moveSpeed;
+      this.currentDirection = "left";
+      isMoving = true;
     } else if (this.cursors.right.isDown || this.wasd.D.isDown) {
       velocityX = this.moveSpeed;
+      this.currentDirection = "right";
+      isMoving = true;
     }
 
     if (this.cursors.up.isDown || this.wasd.W.isDown) {
       velocityY = -this.moveSpeed;
+      if (!isMoving) this.currentDirection = "up";
+      isMoving = true;
     } else if (this.cursors.down.isDown || this.wasd.S.isDown) {
       velocityY = this.moveSpeed;
+      if (!isMoving) this.currentDirection = "down";
+      isMoving = true;
     }
 
     // Normalize diagonal movement
@@ -171,6 +244,13 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.player.setVelocity(velocityX, velocityY);
+
+    // Play appropriate animation
+    if (isMoving) {
+      this.player.anims.play(`walk_${this.currentDirection}`, true);
+    } else {
+      this.player.anims.play(`idle_${this.currentDirection}`, true);
+    }
 
     // Update player depth based on Y position for proper layering
     this.player.setDepth(this.player.y);

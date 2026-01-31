@@ -41,16 +41,19 @@ export class BootScene extends Phaser.Scene {
 
     // Generate placeholder sprites (you'll replace these with your images)
     this.createPlaceholderSprites();
+
+    // Load player sprites
+    this.load.image("player_down_1", "/player/boy_down_1.png");
+    this.load.image("player_down_2", "/player/boy_down_2.png");
+    this.load.image("player_up_1", "/player/boy_up_1.png");
+    this.load.image("player_up_2", "/player/boy_up_2.png");
+    this.load.image("player_left_1", "/player/boy_left_1.png");
+    this.load.image("player_left_2", "/player/boy_left_2.png");
+    this.load.image("player_right_1", "/player/boy_right_1.png");
+    this.load.image("player_right_2", "/player/boy_right_2.png");
   }
 
   createPlaceholderSprites() {
-    // Create a simple player sprite (32x32 colored rectangle)
-    const playerGraphics = this.make.graphics({ x: 0, y: 0 });
-    playerGraphics.fillStyle(0x00ff88, 1);
-    playerGraphics.fillRoundedRect(0, 0, 32, 32, 4);
-    playerGraphics.generateTexture("player", 32, 32);
-    playerGraphics.destroy();
-
     // Create ground/grass tiles
     const grassGraphics = this.make.graphics({ x: 0, y: 0 });
     grassGraphics.fillStyle(0x4a7c59, 1);
