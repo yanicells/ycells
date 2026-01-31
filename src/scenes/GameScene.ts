@@ -18,7 +18,7 @@ export class GameScene extends Phaser.Scene {
     D: Phaser.Input.Keyboard.Key;
   };
   private collisionLayer!: Phaser.Physics.Arcade.StaticGroup;
-  private moveSpeed = 150;
+  private moveSpeed = 120;
   private currentDirection = "down";
 
   constructor() {
@@ -41,6 +41,7 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
     this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
     this.cameras.main.setZoom(2);
+    this.cameras.main.setRoundPixels(true);
 
     // Setup controls
     this.cursors = this.input.keyboard!.createCursorKeys();
@@ -168,11 +169,11 @@ export class GameScene extends Phaser.Scene {
 
         // For trees, first place grass underneath
         if (tileType === TILE_TYPES.TREE) {
-          this.add.image(posX, posY, "tile_grass").setDepth(0);
+          this.add.image(posX, posY, "tile_grass").setScale(2).setDepth(0);
         }
 
         // Create the tile
-        const tile = this.add.image(posX, posY, textureKey);
+        const tile = this.add.image(posX, posY, textureKey).setScale(2);
 
         // Set depth - trees should be above player when player is above them
         if (tileType === TILE_TYPES.TREE) {
@@ -210,12 +211,12 @@ export class GameScene extends Phaser.Scene {
     const posY = startY * TILE_SIZE + TILE_SIZE / 2;
 
     this.player = this.physics.add.sprite(posX, posY, "player_down_1");
-    this.player.setScale(1.5);
+    this.player.setScale(2);
     this.player.setDepth(posY);
 
     // Set up player physics body
-    this.player.body!.setSize(12, 12);
-    this.player.body!.setOffset(2, 4);
+    this.player.body!.setSize(20, 20);
+    this.player.body!.setOffset(6, 12);
   }
 
   update() {
