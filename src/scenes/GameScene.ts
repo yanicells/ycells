@@ -53,7 +53,7 @@ export class GameScene extends Phaser.Scene {
         padding: { x: 10, y: 5 },
       })
       .setScrollFactor(0)
-      .setDepth(100);
+      .setDepth(10000);
 
     // Add coordinates display
     const coordsText = this.add
@@ -64,7 +64,7 @@ export class GameScene extends Phaser.Scene {
         padding: { x: 10, y: 5 },
       })
       .setScrollFactor(0)
-      .setDepth(100);
+      .setDepth(10000);
 
     // Update coordinates text every frame
     this.events.on("update", () => {
