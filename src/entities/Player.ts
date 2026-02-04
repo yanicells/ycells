@@ -24,15 +24,17 @@ export class Player {
     this.sprite = scene.physics.add.sprite(x, y, "player_down_1");
     this.sprite.setScale(GameConfig.player.scale);
 
+    // Calculate body dimensions based on scaled sprite size
+    const scaledWidth = this.sprite.width * GameConfig.player.scale;
+    const scaledHeight = this.sprite.height * GameConfig.player.scale;
+    const bodyWidth = scaledWidth * GameConfig.player.bodyWidthRatio;
+    const bodyHeight = scaledHeight * GameConfig.player.bodyHeightRatio;
+    const offsetX = scaledWidth * GameConfig.player.bodyOffsetXRatio;
+    const offsetY = scaledHeight * GameConfig.player.bodyOffsetYRatio;
+
     // Set up physics body
-    this.sprite.body!.setSize(
-      GameConfig.player.bodyWidth,
-      GameConfig.player.bodyHeight,
-    );
-    this.sprite.body!.setOffset(
-      GameConfig.player.bodyOffsetX,
-      GameConfig.player.bodyOffsetY,
-    );
+    this.sprite.body!.setSize(bodyWidth, bodyHeight);
+    this.sprite.body!.setOffset(offsetX, offsetY);
 
     // Setup controls
     this.cursors = scene.input.keyboard!.createCursorKeys();

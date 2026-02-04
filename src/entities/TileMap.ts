@@ -4,6 +4,7 @@ import {
   TILE_SIZE,
   TILE_SCALE,
   TILE_TEXTURES,
+  SCALED_TILE_SIZE,
   isCollidable,
 } from "../config/TileConfig";
 
@@ -55,8 +56,9 @@ export class TileMap {
   private renderTile(x: number, y: number): void {
     const tileType = this.data[y][x];
     const textureKey = TILE_TEXTURES[tileType];
-    const posX = x * TILE_SIZE + TILE_SIZE / 2;
-    const posY = y * TILE_SIZE + TILE_SIZE / 2;
+    // Position in world coordinates (unscaled), visual scaling handles appearance
+    const posX = x * TILE_SIZE * TILE_SCALE + (TILE_SIZE * TILE_SCALE) / 2;
+    const posY = y * TILE_SIZE * TILE_SCALE + (TILE_SIZE * TILE_SCALE) / 2;
 
     // For trees, place grass underneath
     if (tileType === TileType.TREE) {
@@ -73,7 +75,7 @@ export class TileMap {
 
     // Set depth - trees should render above player when player is above them
     if (tileType === TileType.TREE) {
-      tile.setDepth(posY + TILE_SIZE);
+      tile.setDepth(posY + SCALED_TILE_SIZE);
     } else {
       tile.setDepth(0);
     }
@@ -82,7 +84,8 @@ export class TileMap {
     if (isCollidable(tileType)) {
       const collider = this.collisionGroup.create(posX, posY, textureKey);
       collider.setVisible(false);
-      collider.body.setSize(TILE_SIZE, TILE_SIZE);
+      // For static bodies, setScale doesn't affect physics - set body size directly
+      collider.body.setSize(SCALED_TILE_SIZE, SCALED_TILE_SIZE);
       collider.refreshBody();
     }
   }
@@ -104,11 +107,11 @@ export class TileMap {
   }
 
   public getWorldWidth(): number {
-    return this.width * TILE_SIZE;
+    return this.width * SCALED_TILE_SIZE;
   }
 
   public getWorldHeight(): number {
-    return this.height * TILE_SIZE;
+    return this.height * SCALED_TILE_SIZE;
   }
 
   public findSpawnPoint(): { x: number; y: number } {
@@ -129,8 +132,8 @@ export class TileMap {
     }
 
     return {
-      x: startX * TILE_SIZE + TILE_SIZE / 2,
-      y: startY * TILE_SIZE + TILE_SIZE / 2,
+      x: startX * SCALED_TILE_SIZE + SCALED_TILE_SIZE / 2,
+      y: startY * SCALED_TILE_SIZE + SCALED_TILE_SIZE / 2,
     };
   }
 }

@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { GameConfig } from "../config/GameConfig";
-import { TILE_SIZE } from "../config/TileConfig";
+import { SCALED_TILE_SIZE } from "../config/TileConfig";
 
 export class GameUI {
   private scene: Phaser.Scene;
@@ -33,8 +33,8 @@ export class GameUI {
   }
 
   public updateCoords(x: number, y: number): void {
-    const tileX = Math.floor(x / TILE_SIZE);
-    const tileY = Math.floor(y / TILE_SIZE);
+    const tileX = Math.floor(x / SCALED_TILE_SIZE);
+    const tileY = Math.floor(y / SCALED_TILE_SIZE);
     this.coordsText.setText(`Tile: (${tileX}, ${tileY})`);
   }
 }

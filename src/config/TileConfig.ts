@@ -1,6 +1,10 @@
 // Tile configuration constants
-export const TILE_SIZE = 32;
-export const TILE_SCALE = 2;
+/** Base tile size in pixels - must match actual tile image dimensions */
+export const TILE_SIZE = 16;
+/** Visual scale multiplier for tiles */
+export const TILE_SCALE = 4;
+/** The actual rendered size of a tile (TILE_SIZE * TILE_SCALE) */
+export const SCALED_TILE_SIZE = TILE_SIZE * TILE_SCALE;
 
 export enum TileType {
   GRASS = 0,
