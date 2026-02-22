@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { Source_Serif_4, Inter } from "next/font/google";
+import {
+  Source_Serif_4,
+  Inter,
+  Playfair_Display,
+  Cormorant_Garamond,
+  Space_Mono,
+} from "next/font/google";
 import "./globals.css";
 
 /**
@@ -19,6 +25,27 @@ const inter = Inter({
   display: "swap",
 });
 
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  variable: "--font-cormorant",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  variable: "--font-space-mono",
+  display: "swap",
+  weight: ["400", "700"],
+});
+
 export const metadata: Metadata = {
   title: "Mental Health Matters",
   description:
@@ -34,7 +61,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${sourceSerif.variable} ${inter.variable}`}>
+    <html
+      lang="en"
+      className={`${sourceSerif.variable} ${inter.variable} ${playfair.variable} ${cormorant.variable} ${spaceMono.variable}`}
+    >
       <head>
         <link
           rel="icon"
