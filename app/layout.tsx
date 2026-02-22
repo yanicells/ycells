@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
-import { Lora, Inter } from "next/font/google";
+import { Source_Serif_4, Inter } from "next/font/google";
 import "./globals.css";
 
-const lora = Lora({
+/**
+ * Source Serif 4 — closest Google Fonts match to Medium's Charter.
+ * Clean, editorial serif with excellent readability.
+ */
+const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
-  variable: "--font-lora",
+  variable: "--font-serif",
   display: "swap",
+  weight: ["300", "400", "600", "700", "900"],
 });
 
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-sans",
   display: "swap",
 });
 
@@ -29,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${lora.variable} ${inter.variable}`}>
+    <html lang="en" className={`${sourceSerif.variable} ${inter.variable}`}>
       <head>
         <link
           rel="icon"
@@ -38,9 +43,7 @@ export default function RootLayout({
       </head>
       <body
         style={{
-          fontFamily: "var(--font-inter), sans-serif",
-          backgroundColor: "#F9F7F4",
-          color: "#1A1A1A",
+          fontFamily: "var(--font-serif), Georgia, serif",
         }}
       >
         {children}
