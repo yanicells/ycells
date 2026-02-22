@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 
 const QUOTES = [
   {
-    text: "Life is here for us to be kinder.",
-    attribution: "Shoko Komi, Bunny Girl Senpai",
+    text: "Life is here for us to become kinder. I live life everyday hoping I was a slightly kinder person than I was the day before.",
+    attribution: "Shoko Makinohara, Bunny Girl Senpai",
   },
   {
     text: "Maybe... just maybe, the light can reach even the bottom of a dark ocean.",
