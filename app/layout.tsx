@@ -18,6 +18,9 @@ export const metadata: Metadata = {
   title: "Mental Health Matters",
   description:
     "A quiet space for mental health reminders, gentle quotes, and a little kindness.",
+  verification: {
+    google: "eVLb2lTbuAz4-4MAUUSPkp9ZQe0rHc00MWOyB2LQccg",
+  },
 };
 
 export default function RootLayout({
