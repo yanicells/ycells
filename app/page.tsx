@@ -30,8 +30,8 @@ const QUOTES = [
   },
 ];
 
-/** Easing curve shared across all motion elements */
-const easeOut = [0.0, 0.0, 0.2, 1.0];
+/** Cubic bezier easing shared across all motion elements */
+const easeOut: [number, number, number, number] = [0.0, 0.0, 0.2, 1.0];
 
 export default function Home() {
   return (
@@ -108,10 +108,7 @@ export default function Home() {
                   ease: easeOut,
                 }}
                 whileHover={{ scale: 1.01 }}
-                style={{
-                  cursor: "default",
-                  transition: "scale 0.2s",
-                }}
+                style={{ cursor: "default" }}
               >
                 <QuoteCard text={quote.text} attribution={quote.attribution} />
               </motion.li>
