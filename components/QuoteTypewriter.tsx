@@ -32,16 +32,20 @@ const QUOTES = [
 
 const TYPE_SPEED = 38;
 const ERASE_SPEED = 20;
-const PAUSE_AFTER_TYPE = 2800;
+const PAUSE_AFTER_TYPE = 3500;
 const PAUSE_AFTER_ERASE = 500;
 
-export default function QuoteTypewriter({ startDelay = 0 }: { startDelay?: number }) {
+export default function QuoteTypewriter({
+  startDelay = 0,
+}: {
+  startDelay?: number;
+}) {
   const [quoteIdx, setQuoteIdx] = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [charIdx, setCharIdx] = useState(0);
-  const [phase, setPhase] = useState<"idle" | "typing" | "pausing" | "erasing" | "waiting">(
-    startDelay > 0 ? "idle" : "typing"
-  );
+  const [phase, setPhase] = useState<
+    "idle" | "typing" | "pausing" | "erasing" | "waiting"
+  >(startDelay > 0 ? "idle" : "typing");
   const [cursorVisible, setCursorVisible] = useState(true);
 
   // Show attribution once the full quote is typed out
@@ -107,20 +111,6 @@ export default function QuoteTypewriter({ startDelay = 0 }: { startDelay?: numbe
         minHeight: "120px",
       }}
     >
-      {/* Opening quote mark */}
-      <span
-        aria-hidden="true"
-        style={{
-          fontFamily: "var(--font-playfair), serif",
-          fontSize: "clamp(2rem, 4vw, 3rem)",
-          color: "#D4C5B0",
-          lineHeight: 1,
-          marginBottom: "4px",
-          display: "block",
-        }}
-      >
-        &ldquo;
-      </span>
 
       <blockquote
         aria-live="polite"
@@ -152,7 +142,10 @@ export default function QuoteTypewriter({ startDelay = 0 }: { startDelay?: numbe
       </blockquote>
 
       <motion.cite
-        animate={{ opacity: showAttribution ? 1 : 0, y: showAttribution ? 0 : 6 }}
+        animate={{
+          opacity: showAttribution ? 1 : 0,
+          y: showAttribution ? 0 : 6,
+        }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         style={{
           fontFamily: "var(--font-sans), sans-serif",
