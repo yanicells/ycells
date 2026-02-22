@@ -9,24 +9,44 @@ const QUOTES = [
     attribution: "Shoko Komi, Bunny Girl Senpai",
   },
   {
-    text: "You don't have to earn rest.",
-    attribution: "Unknown",
+    text: "Maybe... just maybe, the light can reach even the bottom of a dark ocean.",
+    attribution: "Kousei Arima, Your Lie in April",
   },
   {
-    text: "Healing isn't linear. Some days you go backwards, and that still counts.",
-    attribution: "Unknown",
+    text: "No matter how hurt someone is, they're meant to overcome it and try to go forward.",
+    attribution: "Mirajane Strauss, Fairy Tail",
   },
   {
-    text: "It's okay to not have it figured out. Most people don't.",
-    attribution: "Unknown",
+    text: "Once you've met someone, you never really forget them. It just takes a while for your memories to return.",
+    attribution: "Zeniba, Spirited Away",
   },
   {
-    text: "Be gentle. Everyone you meet is carrying something heavy.",
-    attribution: "Unknown",
+    text: "Talk to yourself like you would to someone you love.",
+    attribution: "Brené Brown, The Gifts of Imperfection",
   },
   {
-    text: "Your bad days are not your whole story.",
-    attribution: "Unknown",
+    text: "There is hope, even when your brain tells you there isn't.",
+    attribution: "John Green, Turtles All the Way Down",
+  },
+  {
+    text: "The world breaks everyone, and afterward, some are strong at the broken places.",
+    attribution: "Ernest Hemingway, A Farewell to Arms",
+  },
+  {
+    text: "Even the darkest night will end and the sun will rise.",
+    attribution: "Victor Hugo, Les Misérables",
+  },
+  {
+    text: "The flower that blooms in adversity is the most rare and beautiful of all.",
+    attribution: "The Emperor, Mulan (1998)",
+  },
+  {
+    text: "There's no person in the whole world like you, and I like you just the way you are.",
+    attribution: "Fred Rogers, Mister Rogers' Neighborhood",
+  },
+  {
+    text: "We accept the love we think we deserve.",
+    attribution: "Stephen Chbosky, The Perks of Being a Wallflower",
   },
 ];
 
