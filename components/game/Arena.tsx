@@ -17,19 +17,19 @@ export default function Arena() {
   return (
     <group>
       <color attach="background" args={[VOID_BG]} />
-      <fog attach="fog" args={[VOID_FOG, 28, 58]} />
+      <fog attach="fog" args={[VOID_FOG, 36, 72]} />
 
-      <ambientLight intensity={0.42} color="#c8c0b4" />
+      <ambientLight intensity={0.62} color="#d8d0c4" />
       <hemisphereLight
-        intensity={0.55}
-        color="#efe6d8"
-        groundColor="#1a1820"
+        intensity={0.75}
+        color="#fff4e8"
+        groundColor="#2a2835"
       />
       <directionalLight
         castShadow
-        position={[10, 18, 6]}
-        intensity={2.15}
-        color="#fff6ea"
+        position={[8, 16, 7]}
+        intensity={2.6}
+        color="#fff8f0"
         shadow-mapSize={[2048, 2048]}
         shadow-camera-near={1}
         shadow-camera-far={70}
@@ -40,15 +40,15 @@ export default function Arena() {
         shadow-bias={-0.0002}
       />
       <directionalLight
-        position={[-12, 8, -8]}
-        intensity={0.7}
-        color="#9bb0ff"
+        position={[-10, 7, -6]}
+        intensity={0.95}
+        color="#a8bcff"
       />
       <pointLight
-        position={[0, 6, 0]}
-        intensity={0.55}
-        color="#e8c9a0"
-        distance={32}
+        position={[0, 7, 2]}
+        intensity={0.85}
+        color="#f0d2a8"
+        distance={36}
       />
 
       <mesh
@@ -66,7 +66,7 @@ export default function Arena() {
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
         <ringGeometry args={[ARENA_SIZE - 0.12, ARENA_SIZE, 96]} />
-        <meshBasicMaterial color={RIM} transparent opacity={0.38} />
+        <meshBasicMaterial color={RIM} transparent opacity={0.55} />
       </mesh>
 
       <group position={[0, 0.01, 0]}>
@@ -79,7 +79,7 @@ export default function Arena() {
                 <meshBasicMaterial
                   color={FLOOR_LINE}
                   transparent
-                  opacity={0.72}
+                  opacity={0.9}
                 />
               </mesh>
               <mesh position={[t, 0, 0]}>
@@ -87,7 +87,7 @@ export default function Arena() {
                 <meshBasicMaterial
                   color={FLOOR_LINE}
                   transparent
-                  opacity={0.72}
+                  opacity={0.9}
                 />
               </mesh>
             </group>
