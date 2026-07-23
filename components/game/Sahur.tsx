@@ -258,42 +258,50 @@ function Face() {
       <Eye position={[0.22, 0.1, 0.38]} />
 
       {/* Human nose — strong bridge + tip */}
-      <group position={[0, -0.06, 0.42]} rotation={[0.2, 0, 0]}>
-        <mesh castShadow position={[0, 0.04, 0]}>
-          <capsuleGeometry args={[0.06, 0.16, 4, 12]} />
-          <meshStandardMaterial color={NOSE} roughness={0.4} />
+      <group position={[0, -0.08, 0.48]} rotation={[0.28, 0, 0]}>
+        <mesh castShadow position={[0, 0.06, 0]} scale={[0.95, 1.15, 1.1]}>
+          <capsuleGeometry args={[0.072, 0.2, 4, 12]} />
+          <meshStandardMaterial color={NOSE} roughness={0.38} />
         </mesh>
-        <mesh castShadow position={[0, -0.08, 0.04]} scale={[1.15, 0.7, 0.9]}>
-          <sphereGeometry args={[0.07, 12, 12]} />
-          <meshStandardMaterial color="#c49872" roughness={0.42} />
+        <mesh castShadow position={[0, -0.1, 0.06]} scale={[1.35, 0.75, 1.05]}>
+          <sphereGeometry args={[0.085, 14, 12]} />
+          <meshStandardMaterial color="#c49872" roughness={0.4} />
         </mesh>
-        <mesh position={[-0.04, -0.12, 0.03]} scale={[0.65, 0.5, 0.55]}>
-          <sphereGeometry args={[0.04, 8, 8]} />
+        <mesh position={[-0.055, -0.14, 0.05]} scale={[0.7, 0.5, 0.6]}>
+          <sphereGeometry args={[0.048, 8, 8]} />
           <meshStandardMaterial color={FLESH_SHADOW} roughness={0.5} />
         </mesh>
-        <mesh position={[0.04, -0.12, 0.03]} scale={[0.65, 0.5, 0.55]}>
-          <sphereGeometry args={[0.04, 8, 8]} />
+        <mesh position={[0.055, -0.14, 0.05]} scale={[0.7, 0.5, 0.6]}>
+          <sphereGeometry args={[0.048, 8, 8]} />
           <meshStandardMaterial color={FLESH_SHADOW} roughness={0.5} />
         </mesh>
       </group>
 
-      {/* Closed smirk */}
+      {/* Closed smirk — curved closed lips */}
       <mesh
-        position={[0.05, -0.28, 0.38]}
-        rotation={[1.2, 0.05, -0.48]}
-        scale={[1.25, 0.7, 1]}
+        position={[0.06, -0.34, 0.42]}
+        rotation={[1.15, 0.08, -0.55]}
+        scale={[1.45, 0.65, 1]}
       >
-        <torusGeometry args={[0.11, 0.018, 8, 24, Math.PI * 0.95]} />
-        <meshStandardMaterial color={LIP} roughness={0.52} />
+        <torusGeometry args={[0.13, 0.022, 8, 28, Math.PI * 0.9]} />
+        <meshStandardMaterial color={LIP} roughness={0.5} />
+      </mesh>
+      <mesh
+        position={[0.04, -0.325, 0.44]}
+        rotation={[1.15, 0.05, -0.5]}
+        scale={[1.2, 0.4, 0.7]}
+      >
+        <torusGeometry args={[0.1, 0.012, 6, 20, Math.PI * 0.75]} />
+        <meshStandardMaterial color="#8a5a48" roughness={0.55} />
       </mesh>
 
       {/* Cheeks */}
-      <mesh position={[0.26, -0.14, 0.26]} scale={[1, 0.8, 0.75]}>
-        <sphereGeometry args={[0.1, 12, 12]} />
+      <mesh position={[0.3, -0.16, 0.28]} scale={[1.1, 0.85, 0.8]}>
+        <sphereGeometry args={[0.11, 12, 12]} />
         <meshStandardMaterial color="#d0a880" roughness={0.48} />
       </mesh>
-      <mesh position={[-0.24, -0.12, 0.24]} scale={[0.85, 0.7, 0.65]}>
-        <sphereGeometry args={[0.08, 10, 10]} />
+      <mesh position={[-0.28, -0.14, 0.26]} scale={[0.95, 0.75, 0.7]}>
+        <sphereGeometry args={[0.09, 10, 10]} />
         <meshStandardMaterial color="#d0a880" roughness={0.48} />
       </mesh>
     </group>
