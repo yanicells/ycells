@@ -1,6 +1,6 @@
 "use client";
 
-import { ContactShadows, Environment } from "@react-three/drei";
+import { ContactShadows } from "@react-three/drei";
 import {
   ARENA_SIZE,
   FLOOR,
@@ -27,8 +27,8 @@ export default function Arena() {
       />
       <directionalLight
         castShadow
-        position={[8, 16, 14]}
-        intensity={3.15}
+        position={[10, 18, 8]}
+        intensity={3.0}
         color="#fffaf4"
         shadow-mapSize={[2048, 2048]}
         shadow-camera-near={1}
@@ -41,24 +41,15 @@ export default function Arena() {
       />
       <directionalLight
         position={[-14, 10, -8]}
-        intensity={0.95}
+        intensity={1.05}
         color="#a8bcff"
-      />
-      {/* Face-forward fill so carved features catch light */}
-      <pointLight
-        position={[0, 6, 10]}
-        intensity={1.35}
-        color="#ffe8c8"
-        distance={28}
       />
       <pointLight
         position={[0, 9, 3]}
-        intensity={0.75}
+        intensity={0.95}
         color="#f0d2a8"
         distance={52}
       />
-
-      <Environment preset="warehouse" environmentIntensity={0.28} background={false} />
 
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
