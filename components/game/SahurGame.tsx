@@ -59,29 +59,31 @@ export default function SahurGame() {
           position: "relative",
         }}
       >
-        <Canvas
-          shadows
-          dpr={[1, 2]}
-          gl={{ antialias: true, alpha: false }}
-          style={{ width: "100%", height: "100%", outline: "none" }}
-          role="img"
-          aria-label="Tung Tung Tung Sahur 3D arena. Use WASD or arrow keys to move. Space to start or restart. On mobile use the on-screen D-pad."
-        >
-          <PerspectiveCamera
-            makeDefault
-            position={CAMERA_POS}
-            fov={38}
-            near={0.1}
-            far={120}
-          />
-          <Arena />
-          <GameWorld
-            virtualRef={virtualRef}
-            onHud={onHud}
-            restartRef={restartRef}
-            reducedMotion={reducedMotion}
-          />
-        </Canvas>
+        <div style={{ position: "absolute", inset: 0 }}>
+          <Canvas
+            shadows
+            dpr={[1, 2]}
+            gl={{ antialias: true, alpha: false }}
+            style={{ width: "100%", height: "100%", display: "block", outline: "none" }}
+            role="img"
+            aria-label="Tung Tung Tung Sahur 3D arena. Use WASD or arrow keys to move. Space to start or restart. On mobile use the on-screen D-pad."
+          >
+            <PerspectiveCamera
+              makeDefault
+              position={CAMERA_POS}
+              fov={38}
+              near={0.1}
+              far={120}
+            />
+            <Arena />
+            <GameWorld
+              virtualRef={virtualRef}
+              onHud={onHud}
+              restartRef={restartRef}
+              reducedMotion={reducedMotion}
+            />
+          </Canvas>
+        </div>
 
         {/* Score HUD */}
         <div
