@@ -1,37 +1,55 @@
 export type Vec2 = { x: number; y: number };
-export type Facing = "front" | "back" | "left" | "right";
 
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-export function facingFromVelocity(vx: number, vy: number): Facing {
-  const ax = Math.abs(vx);
-  const ay = Math.abs(vy);
-  if (ax < 8 && ay < 8) return "front";
-  if (ax >= ay) return vx < 0 ? "left" : "right";
-  return vy < 0 ? "back" : "front";
+export function length2(x: number, z: number): number {
+  return Math.hypot(x, z);
 }
 
-export function length(v: Vec2): number {
-  return Math.hypot(v.x, v.y);
+export function normalize2(x: number, z: number): { x: number; z: number } {
+  const len = length2(x, z);
+  if (len < 1e-6) return { x: 0, z: 0 };
+  return { x: x / len, z: z / len };
 }
 
-export function normalize(v: Vec2): Vec2 {
-  const len = length(v);
-  if (len < 1e-6) return { x: 0, y: 0 };
-  return { x: v.x / len, y: v.y / len };
+/** Yaw so +Z faces camera; movement on XZ. */
+export function yawFromVelocity(vx: number, vz: number, fallback: number): number {
+  if (Math.hypot(vx, vz) < 0.15) return fallback;
+  return Math.atan2(vx, vz);
 }
 
-export function aabbOverlap(
+export function aabbOverlapXZ(
   ax: number,
-  ay: number,
+  az: number,
   aw: number,
-  ah: number,
+  ad: number,
   bx: number,
-  by: number,
+  bz: number,
   bw: number,
-  bh: number,
+  bd: number,
 ): boolean {
-  return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+  return (
+    ax - aw / 2 < bx + bw / 2 &&
+    ax + aw / 2 > bx - bw / 2 &&
+    az - ad / 2 < bz + bd / 2 &&
+    az + ad / 2 > bz - bd / 2
+  );
+}
+
+export function circleRectOverlapXZ(
+  cx: number,
+  cz: number,
+  radius: number,
+  rx: number,
+  rz: number,
+  rw: number,
+  rd: number,
+): boolean {
+  const nearestX = clamp(cx, rx - rw / 2, rx + rw / 2);
+  const nearestZ = clamp(cz, rz - rd / 2, rz + rd / 2);
+  const dx = cx - nearestX;
+  const dz = cz - nearestZ;
+  return dx * dx + dz * dz < radius * radius;
 }
