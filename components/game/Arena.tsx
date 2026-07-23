@@ -58,7 +58,7 @@ export default function Arena() {
         distance={52}
       />
 
-      <Environment preset="warehouse" environmentIntensity={0.32} />
+      <Environment preset="warehouse" environmentIntensity={0.28} background={false} />
 
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
