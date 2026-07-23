@@ -50,6 +50,7 @@ type SahurProps = {
 type LimbRig = {
   bind: Float32Array;
   position: THREE.BufferAttribute;
+  geometry: THREE.BufferGeometry;
 };
 
 /**
@@ -78,12 +79,22 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
 
       // Fresh geometry so we can morph without touching the GLTF cache.
       mesh.geometry = mesh.geometry.clone();
-      const position = mesh.geometry.attributes
-        .position as THREE.BufferAttribute;
+      const geometry = mesh.geometry;
+      const position = geometry.attributes.position as THREE.BufferAttribute;
+      position.setUsage(THREE.DynamicDrawUsage);
+      geometry.computeBoundingSphere();
+      // Generous radius so swung limbs never frustum-cull mid-stride.
+      if (geometry.boundingSphere) {
+        geometry.boundingSphere.radius = Math.max(
+          geometry.boundingSphere.radius * 1.8,
+          6,
+        );
+      }
       if (!rig) {
         rig = {
           bind: Float32Array.from(position.array as ArrayLike<number>),
           position,
+          geometry,
         };
       }
 
@@ -202,6 +213,8 @@ function applyLimbSwing(
 ) {
   const { bind, position } = rig;
   const arr = position.array as Float32Array;
+  // Guard against a disposed/replaced attribute after HMR or remount.
+  if (!arr || arr.length !== bind.length) return;
   const amp = THREE.MathUtils.clamp(moveAmount, 0, 1.8);
 
   // Idle: softer legs, livelier arms so fidget reads without fake-walking.
