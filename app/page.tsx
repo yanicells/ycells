@@ -1,71 +1,57 @@
-"use client";
-
-import { motion } from "framer-motion";
-import QuoteTypewriter from "@/components/QuoteTypewriter";
-
-const ease: [number, number, number, number] = [0.0, 0.0, 0.2, 1.0];
+import SahurGameLoader from "@/components/game/SahurGameLoader";
 
 export default function Home() {
   return (
     <main
       style={{
-        minHeight: "100vh",
+        minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        padding: "40px 24px 80px",
+        justifyContent: "flex-start",
+        padding: "clamp(1.25rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem) 2rem",
+        gap: "0.75rem",
       }}
     >
-      <div
+      <h1
         style={{
+          margin: 0,
+          fontFamily: "var(--font-display)",
+          fontSize: "clamp(2.4rem, 9vw, 4.75rem)",
+          letterSpacing: "0.04em",
+          lineHeight: 0.95,
           textAlign: "center",
-          maxWidth: "900px",
-          width: "100%",
+          color: "var(--bone)",
+          textShadow: "0 0 40px rgba(196, 168, 130, 0.18)",
+          textTransform: "uppercase",
         }}
       >
-        {/* Hero title */}
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease }}
-          style={{
-            fontFamily: "var(--font-playfair), serif",
-            fontSize: "clamp(3.5rem, 10vw, 8rem)",
-            fontWeight: 700,
-            color: "#1A1A1A",
-            lineHeight: 1.05,
-            letterSpacing: "-0.025em",
-            marginBottom: "40px",
-          }}
-        >
-          Mental Health
-          <br />
-          Matters
-        </motion.h1>
-
-        {/* Thin gold rule */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.8, delay: 0.5, ease }}
-          style={{
-            width: "100px",
-            height: "1px",
-            background: "#C4AA78",
-            margin: "0 auto 52px",
-            transformOrigin: "center",
-          }}
-        />
-
-        {/* Typewriter quote — types in, pauses, erases, cycles all quotes */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.9 }}
-        >
-          <QuoteTypewriter startDelay={1000} />
-        </motion.div>
+        Tung Tung Tung Sahur
+      </h1>
+      <p
+        style={{
+          margin: 0,
+          maxWidth: "28rem",
+          textAlign: "center",
+          fontSize: "clamp(0.85rem, 2.4vw, 1rem)",
+          color: "var(--ash-muted)",
+          letterSpacing: "0.02em",
+        }}
+      >
+        he has a bat. you have WASD. good luck.
+      </p>
+      <div
+        id="game-mount"
+        style={{
+          width: "min(960px, 100%)",
+          flex: 1,
+          minHeight: "min(58dvh, 520px)",
+          marginTop: "0.5rem",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <SahurGameLoader />
       </div>
     </main>
   );

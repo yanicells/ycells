@@ -1,53 +1,46 @@
 @import "tailwindcss";
 
+:root {
+  --void: #050506;
+  --void-deep: #020203;
+  --bone: #c4a882;
+  --bone-dim: #8a7360;
+  --ash: #e8e4df;
+  --ash-muted: #9a9590;
+  --danger: #c45c4a;
+  --score: #d4b896;
+  --ground: #121214;
+  --ground-line: #2a2622;
+  --hud-bg: rgba(5, 5, 6, 0.72);
+
+  --font-display: var(--font-rubik-dirt), "Impact", sans-serif;
+  --font-hud: var(--font-share-tech), "Courier New", monospace;
+}
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
-html {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
 }
 
 body {
-  background-color: #f6f1eb;
-  color: #1a1a1a;
-  overflow-x: hidden;
+  font-family: var(--font-hud);
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, #141210 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, #0c0a08 0%, transparent 50%),
+    var(--void);
+  color: var(--ash);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ── Ambient grain overlay ───────────────────────────── */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-size: 128px 128px;
-}
-
-/* ── Selection styling ───────────────────────────────── */
 ::selection {
-  background-color: #d4c5b0;
-  color: #1a1a1a;
-}
-
-/* ── Scrollbar (webkit) ──────────────────────────────── */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #c4b5a0;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #a89880;
+  background: var(--bone);
+  color: var(--void);
 }

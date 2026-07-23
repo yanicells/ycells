@@ -1,82 +1,36 @@
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next"
-import {
-  Source_Serif_4,
-  Inter,
-  Playfair_Display,
-  Cormorant_Garamond,
-  Space_Mono,
-} from "next/font/google";
+import { Rubik_Dirt, Share_Tech_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
-/**
- * Source Serif 4 — closest Google Fonts match to Medium's Charter.
- * Clean, editorial serif with excellent readability.
- */
-const sourceSerif = Source_Serif_4({
+const rubikDirt = Rubik_Dirt({
+  weight: "400",
   subsets: ["latin"],
-  variable: "--font-serif",
-  display: "swap",
-  weight: ["300", "400", "600", "700", "900"],
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-rubik-dirt",
   display: "swap",
 });
 
-const playfair = Playfair_Display({
+const shareTech = Share_Tech_Mono({
+  weight: "400",
   subsets: ["latin"],
-  variable: "--font-playfair",
+  variable: "--font-share-tech",
   display: "swap",
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  variable: "--font-cormorant",
-  display: "swap",
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  variable: "--font-space-mono",
-  display: "swap",
-  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Mental Health Matters",
+  title: "TUNG TUNG TUNG SAHUR",
   description:
-    "A quiet space for mental health reminders, gentle quotes, and a little kindness.",
-  verification: {
-    google: "eVLb2lTbuAz4-4MAUUSPkp9ZQe0rHc00MWOyB2LQccg",
-  },
+    "he has a bat. you have WASD. survive the void. a shitpost arena starring tung tung tung sahur.",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html
-      lang="en"
-      className={`${sourceSerif.variable} ${inter.variable} ${playfair.variable} ${cormorant.variable} ${spaceMono.variable}`}
-    >
-      <head>
-        <link
-          rel="icon"
-          href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>"
-        />
-      </head>
-      <body
-        style={{
-          fontFamily: "var(--font-serif), Georgia, serif",
-        }}
-      >
+    <html lang="en" className={`${rubikDirt.variable} ${shareTech.variable}`}>
+      <body>
         {children}
         <Analytics />
       </body>
