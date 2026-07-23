@@ -1,6 +1,6 @@
 "use client";
 
-import { ContactShadows } from "@react-three/drei";
+import { ContactShadows, Environment } from "@react-three/drei";
 import {
   ARENA_SIZE,
   FLOOR,
@@ -50,6 +50,8 @@ export default function Arena() {
         color="#f0d2a8"
         distance={52}
       />
+
+      <Environment preset="warehouse" environmentIntensity={0.32} />
 
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
