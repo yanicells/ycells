@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import Sahur, { type SahurAnimState } from "./Sahur";
 import Obstacles3D from "./Obstacles3D";
@@ -259,7 +259,9 @@ export default function GameWorld({
 
   return (
     <>
-      <Sahur anim={anim} reducedMotion={reducedMotion} />
+      <Suspense fallback={null}>
+        <Sahur anim={anim} reducedMotion={reducedMotion} />
+      </Suspense>
       <Obstacles3D obstaclesRef={obstaclesRef} />
     </>
   );
