@@ -159,9 +159,9 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
   return (
     <group ref={root} scale={1.85}>
       <group ref={body}>
-        {/* Tall continuous kentongan body */}
-        <mesh ref={bodyMesh} castShadow receiveShadow position={[0, 2.15, 0]}>
-          <cylinderGeometry args={[0.58, 0.64, 3.55, 48]} />
+        {/* Tall continuous kentongan body (~65% of figure height) */}
+        <mesh ref={bodyMesh} castShadow receiveShadow position={[0, 2.4, 0]}>
+          <cylinderGeometry args={[0.62, 0.7, 4.05, 48]} />
           <meshStandardMaterial
             map={bodyMat}
             color="#e8d0aa"
