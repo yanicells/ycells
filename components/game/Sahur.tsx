@@ -129,28 +129,35 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
     }
 
     const swing =
-      Math.sin(phase.current) * (moving ? 1 : 0.22) * motion;
+      Math.sin(phase.current) * (moving ? 1 : 0.28) * motion;
     const swingAbs = Math.abs(swing);
+    const cosSwing = Math.cos(phase.current);
 
     if (model.current) {
+      // Whole-body read: bob, hip sway, torso twist, forward lean.
       const bob =
         Math.sin(phase.current * 2) *
-        (moving ? 0.16 : 0.05) *
+        (moving ? 0.28 : 0.06) *
         motion;
-      const lean = moving ? a.moveAmount * 0.18 * motion : 0;
-      const sway = swing * (moving ? 0.1 : 0.025) * motion;
-      model.current.position.y = bob + swingAbs * (moving ? 0.06 : 0);
+      const stepPop = swingAbs * (moving ? 0.12 : 0.02) * motion;
+      const lean = moving ? a.moveAmount * 0.32 * motion : 0.04 * motion;
+      const hipSway = swing * (moving ? 0.22 : 0.04) * motion;
+      const torsoTwist = swing * (moving ? 0.18 : 0.03) * motion;
+      const hipYaw = cosSwing * (moving ? 0.08 : 0.015) * motion;
+      model.current.position.y = bob + stepPop;
+      model.current.position.x = hipSway * 0.35;
       model.current.rotation.x = lean;
-      model.current.rotation.z = sway;
+      model.current.rotation.y = torsoTwist;
+      model.current.rotation.z = hipSway + hipYaw * 0.5;
     }
 
     const rig = limbRig.current;
     if (rig) {
       const amount = reducedMotion
-        ? 0.12
+        ? 0.14
         : moving
-          ? Math.max(0.85, a.moveAmount * 1.15)
-          : 0.35;
+          ? Math.max(1.05, a.moveAmount * 1.35)
+          : 0.42;
       applyLimbSwing(rig, phase.current, amount);
     }
 
