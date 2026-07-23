@@ -3,6 +3,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { PerspectiveCamera } from "@react-three/drei";
 import Arena from "./Arena";
+import Sahur from "./Sahur";
 import { CAMERA_POS, CAMERA_TARGET } from "./constants";
 
 function LookAt({ target }: { target: [number, number, number] }) {
@@ -13,10 +14,6 @@ function LookAt({ target }: { target: [number, number, number] }) {
   return null;
 }
 
-/**
- * Minimal R3F shell: void arena + dramatic lighting.
- * Gameplay / Sahur mesh land in follow-up commits.
- */
 export default function SahurGame() {
   return (
     <div
@@ -54,11 +51,7 @@ export default function SahurGame() {
           />
           <LookAt target={CAMERA_TARGET} />
           <Arena />
-          {/* Placeholder spawn marker until procedural Sahur lands */}
-          <mesh position={[0, 0.05, 2.5]} castShadow>
-            <cylinderGeometry args={[0.35, 0.35, 0.1, 24]} />
-            <meshStandardMaterial color="#c4a882" roughness={0.4} />
-          </mesh>
+          <Sahur position={[0, 0, 2.2]} yaw={0} moveAmount={0} />
         </Canvas>
       </div>
     </div>
