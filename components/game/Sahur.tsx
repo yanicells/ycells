@@ -99,11 +99,10 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
     let rig: LimbRig | null = null;
     if (targetMesh) {
       const mesh = targetMesh as THREE.Mesh;
-      const geo = mesh.geometry.index
-        ? mesh.geometry.toNonIndexed()
-        : mesh.geometry.clone();
-      mesh.geometry = geo;
-      const position = geo.attributes.position as THREE.BufferAttribute;
+      // Own geometry copy so we can morph without mutating the cached GLTF.
+      mesh.geometry = mesh.geometry.clone();
+      const position = mesh.geometry.attributes
+        .position as THREE.BufferAttribute;
       rig = {
         mesh,
         bind: new Float32Array(position.array as Float32Array),
@@ -235,7 +234,6 @@ function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
   }
 
   position.needsUpdate = true;
-  rig.mesh.geometry.computeVertexNormals();
 }
 
 useGLTF.preload(MODEL_URL);
