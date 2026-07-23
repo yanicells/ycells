@@ -53,8 +53,8 @@ export default function SahurGame() {
         style={{
           flex: 1,
           minHeight: 0,
-          border: "1px solid rgba(212, 184, 150, 0.22)",
-          background: "#0e0f14",
+          border: "1px solid rgba(228, 200, 160, 0.24)",
+          background: "#161822",
           overflow: "hidden",
           position: "relative",
         }}
@@ -69,7 +69,7 @@ export default function SahurGame() {
             role="img"
             aria-label="Tung Tung Tung Sahur 3D arena. Use WASD or arrow keys to move. Space to start or restart. On mobile use the on-screen D-pad."
             onCreated={({ gl, size }) => {
-              gl.setClearColor("#0e0f14");
+              gl.setClearColor("#161822");
               if (size.width > 0 && size.height > 0) {
                 gl.setSize(size.width, size.height, false);
               }
@@ -78,9 +78,9 @@ export default function SahurGame() {
             <PerspectiveCamera
               makeDefault
               position={CAMERA_POS}
-              fov={34}
+              fov={36}
               near={0.1}
-              far={120}
+              far={160}
             />
             <Arena />
             <GameWorld
