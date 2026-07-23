@@ -5,8 +5,8 @@ export const MAX_SPEED = 8.5;
 export const ACCEL = 28;
 export const FRICTION = 18;
 
-export const PLAYER_RADIUS = 0.95;
-export const PLAYER_HEIGHT = 5.8;
+export const PLAYER_RADIUS = 1.15;
+export const PLAYER_HEIGHT = 7.2;
 
 /** Soft elevated follow camera — framed for a tall Sahur in a wide arena. */
 export const CAMERA_POS: [number, number, number] = [0, 18, 26];
