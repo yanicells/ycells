@@ -244,7 +244,7 @@ export default function GameWorld({
     camera.position.x += (camX - camera.position.x) * Math.min(1, dt * 2.6);
     camera.position.z += (camZ - camera.position.z) * Math.min(1, dt * 2.6);
     camera.position.y = CAMERA_POS[1] + a.moveAmount * 0.4;
-    camera.lookAt(a.x * 0.35, 2.8, a.z * 0.35);
+    camera.lookAt(a.x * 0.3, 3.4, a.z * 0.3);
 
     hudTick.current += dt;
     if (phaseRef.current === "playing" && hudTick.current > 0.1) {
