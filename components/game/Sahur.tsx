@@ -119,7 +119,8 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
     const a = anim.current;
     const motion = reducedMotion ? 0.12 : 1;
     const moving = a.moveAmount > 0.08;
-    const cadence = moving ? 10 + a.moveAmount * 4.5 : 2.4;
+    // Snappier walk cadence; idle keeps a slow fidget pulse.
+    const cadence = moving ? 11.5 + a.moveAmount * 5 : 2.8;
     phase.current += dt * cadence * motion;
 
     if (root.current) {
@@ -139,28 +140,32 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
       // Whole-body read: bob, hip sway, torso twist, forward lean.
       const bob =
         Math.sin(phase.current * 2) *
-        (moving ? 0.28 : 0.06) *
+        (moving ? 0.28 : 0.09) *
         motion;
-      const stepPop = swingAbs * (moving ? 0.12 : 0.02) * motion;
-      const lean = moving ? a.moveAmount * 0.32 * motion : 0.04 * motion;
-      const hipSway = swing * (moving ? 0.22 : 0.04) * motion;
-      const torsoTwist = swing * (moving ? 0.18 : 0.03) * motion;
-      const hipYaw = cosSwing * (moving ? 0.08 : 0.015) * motion;
+      const stepPop = swingAbs * (moving ? 0.12 : 0.035) * motion;
+      const lean = moving ? a.moveAmount * 0.32 * motion : 0.055 * motion;
+      const hipSway = swing * (moving ? 0.22 : 0.07) * motion;
+      const torsoTwist = swing * (moving ? 0.18 : 0.05) * motion;
+      const hipYaw = cosSwing * (moving ? 0.08 : 0.03) * motion;
+      // Idle weight-shift fidget (asymmetric so it doesn't look like a walk).
+      const fidget = !moving
+        ? Math.sin(phase.current * 0.65 + 0.7) * 0.045 * motion
+        : 0;
       model.current.position.y = bob + stepPop;
-      model.current.position.x = hipSway * 0.35;
+      model.current.position.x = hipSway * 0.35 + fidget;
       model.current.rotation.x = lean;
-      model.current.rotation.y = torsoTwist;
-      model.current.rotation.z = hipSway + hipYaw * 0.5;
+      model.current.rotation.y = torsoTwist + fidget * 0.6;
+      model.current.rotation.z = hipSway + hipYaw * 0.5 + fidget * 0.8;
     }
 
     const rig = limbRig.current;
     if (rig) {
       const amount = reducedMotion
-        ? 0.14
+        ? 0.16
         : moving
-          ? Math.max(1.05, a.moveAmount * 1.35)
-          : 0.42;
-      applyLimbSwing(rig, phase.current, amount);
+          ? Math.max(1.1, a.moveAmount * 1.4)
+          : 0.55;
+      applyLimbSwing(rig, phase.current, amount, moving);
     }
 
     for (const mat of materials.current) {
@@ -183,17 +188,27 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
   );
 }
 
-function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
+function applyLimbSwing(
+  rig: LimbRig,
+  phase: number,
+  moveAmount: number,
+  moving: boolean,
+) {
   const { bind, position } = rig;
   const arr = position.array as Float32Array;
   const amp = THREE.MathUtils.clamp(moveAmount, 0, 1.8);
 
-  const legAng = LEG_STRIDE_RAD * amp;
-  const liftAmp = LEG_LIFT * amp;
-  const armAng = ARM_STRIDE_RAD * amp;
-  const armLift = ARM_LIFT * amp;
+  // Idle: softer legs, livelier arms so fidget reads without fake-walking.
+  const legScale = moving ? 1 : 0.55;
+  const armScale = moving ? 1 : 0.85;
+  const legAng = LEG_STRIDE_RAD * amp * legScale;
+  const liftAmp = LEG_LIFT * amp * (moving ? 1 : 0.35);
+  const armAng = ARM_STRIDE_RAD * amp * armScale;
+  const armLift = ARM_LIFT * amp * (moving ? 1 : 0.45);
   const sinP = Math.sin(phase);
   const cosP = Math.cos(phase);
+  // Secondary harmonic = knee/elbow-ish crease while moving.
+  const kneeKick = moving ? Math.sin(phase * 2) * 0.18 * amp : 0;
 
   for (let i = 0; i < bind.length; i += 3) {
     const x = bind[i];
@@ -219,7 +234,10 @@ function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
       const sideSep = THREE.MathUtils.smoothstep(Math.abs(x), 0.1, 0.28);
       const w = attach * mask * sideSep;
       // Negative angle drives the foot toward -Y (facing direction).
-      const theta = -sinP * side * legAng * w;
+      const shin =
+        THREE.MathUtils.smoothstep(z, 0.05, 0.85) *
+        (1 - THREE.MathUtils.smoothstep(z, 0.85, 1.35));
+      const theta = (-sinP * side * legAng + kneeKick * side * shin) * w;
       const c = Math.cos(theta);
       const s = Math.sin(theta);
       const dy = y;
