@@ -215,7 +215,7 @@ function applyLimbSwing(
   const arr = position.array as Float32Array;
   // Guard against a disposed/replaced attribute after HMR or remount.
   if (!arr || arr.length !== bind.length) return;
-  const amp = THREE.MathUtils.clamp(moveAmount, 0, 1.8);
+  const amp = THREE.MathUtils.clamp(moveAmount, 0, 2.2);
 
   // Idle: softer legs, livelier arms so fidget reads without fake-walking.
   const legScale = moving ? 1 : 0.55;
@@ -245,6 +245,21 @@ function applyLimbSwing(
     // Bat hanging into the lower band — don't treat as a leg.
     const isBat =
       radial > BAT_RADIUS && z < ARM_MAX_Z && Math.abs(x) > 0.35;
+
+    // Waist / pelvis sway — light lateral only, keeps torso readable.
+    if (
+      !isBat &&
+      z >= LEG_MAX_Z &&
+      z < ARM_MIN_Z + 0.15 &&
+      radial < TORSO_RADIUS + 0.15
+    ) {
+      const waist =
+        Math.sin(((z - LEG_MAX_Z) / (ARM_MIN_Z - LEG_MAX_Z + 0.15)) * Math.PI) *
+        (moving ? 1 : 0.45);
+      ox = x + sinP * 0.22 * amp * waist;
+      oy = y;
+      oz = z + Math.abs(sinP) * 0.04 * amp * waist;
+    }
 
     // Legs — hip pivot (YZ stride) + bold lift/lateral for front-cam read.
     if (!isBat && z < LEG_MAX_Z && radial > LEG_CORE_RADIUS && Math.abs(x) > 0.1) {
