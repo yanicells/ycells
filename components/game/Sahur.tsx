@@ -544,39 +544,54 @@ function Eye({ position }: { position: [number, number, number] }) {
 }
 
 function Foot({ side }: { side: number }) {
+  const toeXs = [-0.2, -0.1, 0, 0.1, 0.2];
   return (
-    <group position={[0, -1.08, 0.18]} rotation={[0.1, side * 0.22, 0]}>
-      {/* Disproportionately huge fleshy sole */}
-      <mesh castShadow position={[0, 0, 0.18]} scale={[1.45, 0.38, 2.15]}>
-        <sphereGeometry args={[0.3, 18, 14]} />
-        <meshStandardMaterial color={FLESH} roughness={0.66} />
-      </mesh>
-      {/* Heel pad */}
-      <mesh castShadow position={[0, 0.03, -0.22]} scale={[1.15, 0.6, 0.9]}>
-        <sphereGeometry args={[0.18, 12, 10]} />
-        <meshStandardMaterial color={FLESH_SHADOW} roughness={0.7} />
-      </mesh>
-      {/* Ankle puff */}
-      <mesh castShadow position={[0, 0.1, -0.02]} scale={[0.9, 0.7, 0.85]}>
-        <sphereGeometry args={[0.1, 10, 10]} />
+    <group position={[0, -1.1, 0.12]} rotation={[0.08, side * 0.12, 0]}>
+      {/* Elongated human sole — heel to ball */}
+      <mesh castShadow position={[0, 0.02, 0.08]} scale={[1.05, 0.35, 1.85]}>
+        <capsuleGeometry args={[0.22, 0.35, 4, 12]} />
         <meshStandardMaterial color={FLESH} roughness={0.64} />
       </mesh>
-      {/* Five chunky toes */}
-      {[-0.18, -0.09, 0, 0.09, 0.18].map((x, i) => {
-        const size = 0.078 - Math.abs(i - 2) * 0.008;
+      {/* Heel */}
+      <mesh castShadow position={[0, 0.04, -0.28]} scale={[1.05, 0.7, 0.95]}>
+        <sphereGeometry args={[0.16, 14, 12]} />
+        <meshStandardMaterial color={FLESH_SHADOW} roughness={0.7} />
+      </mesh>
+      {/* Arch / midfoot */}
+      <mesh castShadow position={[0, 0.06, 0.02]} scale={[0.85, 0.55, 1.1]}>
+        <sphereGeometry args={[0.12, 12, 10]} />
+        <meshStandardMaterial color={FLESH} roughness={0.62} />
+      </mesh>
+      {/* Ball of foot */}
+      <mesh castShadow position={[0, 0.03, 0.38]} scale={[1.25, 0.45, 0.85]}>
+        <sphereGeometry args={[0.16, 14, 12]} />
+        <meshStandardMaterial color={FLESH} roughness={0.64} />
+      </mesh>
+      {/* Ankle */}
+      <mesh castShadow position={[0, 0.16, -0.08]} scale={[0.85, 0.85, 0.9]}>
+        <sphereGeometry args={[0.09, 12, 10]} />
+        <meshStandardMaterial color={FLESH} roughness={0.6} />
+      </mesh>
+      {/* Five graduated toes pointing forward */}
+      {toeXs.map((x, i) => {
+        const mid = 2;
+        const dist = Math.abs(i - mid);
+        const len = 0.14 - dist * 0.018;
+        const rad = 0.048 - dist * 0.006;
         return (
           <mesh
             key={i}
             castShadow
             position={[
-              x + side * 0.025,
-              0.03,
-              0.55 - Math.abs(x) * 0.28,
+              x + side * 0.02,
+              0.035,
+              0.58 + (mid - dist) * 0.02,
             ]}
-            scale={[0.85, 0.6, 1.15]}
+            rotation={[0.15, 0, 0]}
+            scale={[0.9, 0.7, 1.35]}
           >
-            <sphereGeometry args={[size, 10, 10]} />
-            <meshStandardMaterial color={FLESH} roughness={0.68} />
+            <capsuleGeometry args={[rad, len, 3, 8]} />
+            <meshStandardMaterial color={FLESH} roughness={0.66} />
           </mesh>
         );
       })}
