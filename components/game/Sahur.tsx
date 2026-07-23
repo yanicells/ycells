@@ -433,13 +433,36 @@ function Face() {
         </mesh>
       </group>
 
-      <mesh position={[0.34, -0.16, 0.28]} scale={[1.15, 0.9, 0.75]}>
-        <sphereGeometry args={[0.12, 12, 12]} />
-        <meshStandardMaterial color="#d4ac88" roughness={0.46} />
+      {/* Cheeks + jaw so the face reads human from 3/4 view */}
+      <mesh castShadow position={[0.36, -0.12, 0.3]} scale={[1.2, 1.0, 0.9]}>
+        <sphereGeometry args={[0.14, 14, 12]} />
+        <meshStandardMaterial color="#d4ac88" roughness={0.44} />
       </mesh>
-      <mesh position={[-0.32, -0.14, 0.26]} scale={[1, 0.8, 0.7]}>
-        <sphereGeometry args={[0.1, 10, 10]} />
-        <meshStandardMaterial color="#d4ac88" roughness={0.46} />
+      <mesh castShadow position={[-0.34, -0.1, 0.28]} scale={[1.1, 0.9, 0.85]}>
+        <sphereGeometry args={[0.125, 14, 12]} />
+        <meshStandardMaterial color="#d4ac88" roughness={0.44} />
+      </mesh>
+      <mesh castShadow position={[0.28, -0.42, 0.22]} scale={[1.1, 0.7, 0.85]}>
+        <sphereGeometry args={[0.12, 12, 10]} />
+        <meshStandardMaterial color="#c9a078" roughness={0.48} />
+      </mesh>
+      <mesh castShadow position={[-0.26, -0.4, 0.2]} scale={[1.0, 0.65, 0.8]}>
+        <sphereGeometry args={[0.11, 12, 10]} />
+        <meshStandardMaterial color="#c9a078" roughness={0.48} />
+      </mesh>
+      {/* Chin / jaw tip */}
+      <mesh castShadow position={[0.02, -0.55, 0.32]} scale={[1.15, 0.7, 0.9]}>
+        <sphereGeometry args={[0.1, 12, 10]} />
+        <meshStandardMaterial color="#d0a880" roughness={0.46} />
+      </mesh>
+      {/* Temples / side planes for 3/4 silhouette */}
+      <mesh castShadow position={[0.42, 0.08, 0.12]} scale={[0.7, 1.1, 0.8]}>
+        <sphereGeometry args={[0.12, 12, 10]} />
+        <meshStandardMaterial color="#c49a72" roughness={0.42} />
+      </mesh>
+      <mesh castShadow position={[-0.42, 0.08, 0.12]} scale={[0.7, 1.1, 0.8]}>
+        <sphereGeometry args={[0.12, 12, 10]} />
+        <meshStandardMaterial color="#c49a72" roughness={0.42} />
       </mesh>
     </group>
   );
