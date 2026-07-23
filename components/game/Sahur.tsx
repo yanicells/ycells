@@ -124,8 +124,8 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
     const a = anim.current;
     const motion = reducedMotion ? 0.12 : 1;
     const moving = a.moveAmount > 0.08;
-    // Snappier walk cadence; idle keeps a slow fidget pulse.
-    const cadence = moving ? 11.5 + a.moveAmount * 5 : 2.8;
+    // Walk cadence punches steps; idle keeps a slow fidget pulse.
+    const cadence = moving ? 12.5 + a.moveAmount * 5.5 : 3.0;
     phase.current += dt * cadence * motion;
 
     if (root.current) {
@@ -137,39 +137,40 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
     }
 
     const swing =
-      Math.sin(phase.current) * (moving ? 1 : 0.28) * motion;
+      Math.sin(phase.current) * (moving ? 1 : 0.32) * motion;
     const swingAbs = Math.abs(swing);
     const cosSwing = Math.cos(phase.current);
+    const stepPulse = Math.sin(phase.current * 2);
 
     if (model.current) {
-      // Whole-body read: bob, hip sway, torso twist, forward lean.
-      const bob =
-        Math.sin(phase.current * 2) *
-        (moving ? 0.28 : 0.09) *
-        motion;
-      const stepPop = swingAbs * (moving ? 0.12 : 0.035) * motion;
-      const lean = moving ? a.moveAmount * 0.32 * motion : 0.055 * motion;
-      const hipSway = swing * (moving ? 0.22 : 0.07) * motion;
-      const torsoTwist = swing * (moving ? 0.18 : 0.05) * motion;
-      const hipYaw = cosSwing * (moving ? 0.08 : 0.03) * motion;
+      // Whole-body sells walking even when limb depth is foreshortened.
+      const bob = stepPulse * (moving ? 0.42 : 0.1) * motion;
+      const stepPop = swingAbs * (moving ? 0.18 : 0.04) * motion;
+      const lean = moving ? 0.12 + a.moveAmount * 0.38 * motion : 0.06 * motion;
+      const hipSway = swing * (moving ? 0.34 : 0.08) * motion;
+      const torsoTwist = swing * (moving ? 0.28 : 0.06) * motion;
+      const hipRoll = cosSwing * (moving ? 0.14 : 0.035) * motion;
       // Idle weight-shift fidget (asymmetric so it doesn't look like a walk).
       const fidget = !moving
-        ? Math.sin(phase.current * 0.65 + 0.7) * 0.045 * motion
+        ? Math.sin(phase.current * 0.65 + 0.7) * 0.06 * motion
         : 0;
       model.current.position.y = bob + stepPop;
-      model.current.position.x = hipSway * 0.35 + fidget;
+      model.current.position.x = hipSway * 0.55 + fidget;
+      // Slight vertical squash on each footfall.
+      const squash = moving ? 1 - Math.max(0, stepPulse) * 0.04 * motion : 1;
+      model.current.scale.set(1 / Math.sqrt(squash), squash, 1 / Math.sqrt(squash));
       model.current.rotation.x = lean;
-      model.current.rotation.y = torsoTwist + fidget * 0.6;
-      model.current.rotation.z = hipSway + hipYaw * 0.5 + fidget * 0.8;
+      model.current.rotation.y = torsoTwist + fidget * 0.7;
+      model.current.rotation.z = hipSway + hipRoll * 0.65 + fidget * 0.9;
     }
 
     const rig = limbRig.current;
     if (rig) {
       const amount = reducedMotion
-        ? 0.16
+        ? 0.18
         : moving
-          ? Math.max(1.1, a.moveAmount * 1.4)
-          : 0.55;
+          ? Math.max(1.25, 0.85 + a.moveAmount * 0.95)
+          : 0.58;
       applyLimbSwing(rig, phase.current, amount, moving);
     }
 
