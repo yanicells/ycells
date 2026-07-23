@@ -117,7 +117,7 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
       root.current.position.set(a.x, 1.48, a.z);
       root.current.rotation.y = a.yaw;
       const punch = a.hitFlash > 0 ? 1 + a.hitFlash * 0.07 : 1;
-      root.current.scale.setScalar(2.15 * punch);
+      root.current.scale.setScalar(1.95 * punch);
     }
 
     const bob =
