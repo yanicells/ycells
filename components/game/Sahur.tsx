@@ -13,7 +13,6 @@ const MODEL_URL = "/models/sahur.glb";
  * Mesh-local Z is height on this Sketchfab export (feet≈0, head≈5.85).
  * Limb swing is a fake walk cycle — the GLB has no skeleton/animations.
  */
-const GEO_HEIGHT = 5.85;
 const LEG_MAX_Z = 1.55;
 const ARM_MIN_Z = 1.9;
 const ARM_MAX_Z = 3.85;
@@ -131,31 +130,34 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
 
     if (root.current) {
       root.current.position.set(a.x, 0, a.z);
-      root.current.rotation.y = a.yaw;
+      // GLB faces -Z in yaw=0; camera sits on +Z, so flip to show the face.
+      root.current.rotation.y = a.yaw + Math.PI;
       const punch = a.hitFlash > 0 ? 1 + a.hitFlash * 0.07 : 1;
       root.current.scale.setScalar(punch);
     }
 
     const swing =
-      Math.sin(phase.current) * (moving ? 1 : 0.12) * motion;
+      Math.sin(phase.current) * (moving ? 1 : 0.18) * motion;
     const swingAbs = Math.abs(swing);
 
     if (model.current) {
       const bob =
         Math.sin(phase.current * 2) *
-        (moving ? 0.11 : 0.028) *
+        (moving ? 0.14 : 0.04) *
         motion;
-      const lean = moving ? a.moveAmount * 0.14 * motion : 0;
-      const sway = swing * (moving ? 0.055 : 0.012) * motion;
-      model.current.position.y = bob + swingAbs * (moving ? 0.04 : 0);
+      const lean = moving ? a.moveAmount * 0.16 * motion : 0;
+      const sway = swing * (moving ? 0.08 : 0.02) * motion;
+      model.current.position.y = bob + swingAbs * (moving ? 0.05 : 0);
       model.current.rotation.x = lean;
       model.current.rotation.z = sway;
     }
 
-    if (limbRig && !reducedMotion) {
-      applyLimbSwing(limbRig, phase.current, moving ? a.moveAmount : 0.06);
-    } else if (limbRig && reducedMotion) {
-      applyLimbSwing(limbRig, phase.current, 0.04);
+    if (limbRig) {
+      applyLimbSwing(
+        limbRig,
+        phase.current,
+        reducedMotion ? 0.08 : moving ? Math.max(0.55, a.moveAmount) : 0.16,
+      );
     }
 
     for (const mat of materials) {
@@ -181,9 +183,9 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
 function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
   const { bind, position } = rig;
   const arr = position.array as Float32Array;
-  const amp = THREE.MathUtils.clamp(moveAmount, 0, 1.35);
-  const legAmp = 0.72 * amp;
-  const armAmp = 0.55 * amp;
+  const amp = THREE.MathUtils.clamp(moveAmount, 0, 1.6);
+  const legAmp = 1.15 * amp;
+  const armAmp = 0.95 * amp;
   const hipZ = LEG_MAX_Z;
 
   for (let i = 0; i < bind.length; i += 3) {
@@ -207,18 +209,13 @@ function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
       // Rotate around X through hip: swings forward/back in Y
       oy = y * c - lz * s;
       oz = y * s + lz * c + hipZ;
-      // Slight outward step
-      ox = x + side * t * 0.04 * amp;
+      ox = x + side * t * 0.06 * amp;
     }
 
     // Arms + bat hand — counter-phase to legs; skip tight torso cylinder
-    if (
-      z > ARM_MIN_Z &&
-      z < ARM_MAX_Z &&
-      radial > TORSO_RADIUS
-    ) {
+    if (z > ARM_MIN_Z && z < ARM_MAX_Z && radial > TORSO_RADIUS) {
       const t = (z - ARM_MIN_Z) / (ARM_MAX_Z - ARM_MIN_Z);
-      const fall = t * (1 - t) * 4; // stronger mid-forearm
+      const fall = t * (1 - t) * 4;
       const ang = -Math.sin(phase) * side * armAmp * (0.35 + 0.65 * fall);
       const c = Math.cos(ang);
       const s = Math.sin(ang);
