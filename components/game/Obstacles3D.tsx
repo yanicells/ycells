@@ -12,25 +12,27 @@ type Props = {
 function makeObstacleMesh(kind: ObstacleKind, w: number, d: number, h: number): THREE.Group {
   const g = new THREE.Group();
   const woodDark = new THREE.MeshStandardMaterial({
-    color: "#2a2420",
+    color: "#6a5040",
     roughness: 0.55,
     metalness: 0.05,
   });
   const handleMat = new THREE.MeshStandardMaterial({
-    color: "#5a4634",
+    color: "#8a6a48",
     roughness: 0.5,
   });
   const cylMat = new THREE.MeshStandardMaterial({
-    color: "#1a1612",
-    roughness: 0.7,
-    metalness: 0.1,
+    color: "#3a3648",
+    roughness: 0.65,
+    metalness: 0.12,
+    emissive: "#2a2038",
+    emissiveIntensity: 0.35,
   });
   const blockMat = new THREE.MeshStandardMaterial({
-    color: "#12100e",
-    roughness: 0.85,
+    color: "#2e2830",
+    roughness: 0.8,
     metalness: 0.05,
-    emissive: "#3a1814",
-    emissiveIntensity: 0.25,
+    emissive: "#4a2824",
+    emissiveIntensity: 0.35,
   });
 
   if (kind === "bat") {
