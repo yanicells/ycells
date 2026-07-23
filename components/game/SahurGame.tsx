@@ -11,8 +11,7 @@ import { CAMERA_POS } from "./constants";
 export default function SahurGame() {
   const virtualRef = useRef({ x: 0, y: 0 });
   const restartRef = useRef<() => void>(() => {});
-  const [phaseUi, setPhaseUi] = useState<Phase>("start");
-  const [, setHud] = useState<GameHudState>({
+  const [hud, setHud] = useState<GameHudState>({
     phase: "start",
     score: 0,
     highScore: 0,
@@ -27,7 +26,6 @@ export default function SahurGame() {
 
   const onHud = useCallback((state: GameHudState) => {
     setHud(state);
-    setPhaseUi(state.phase);
   }, []);
 
   const onDir = useCallback((axis: "x" | "y", value: number) => {
@@ -37,6 +35,8 @@ export default function SahurGame() {
   const onRestart = useCallback(() => {
     restartRef.current();
   }, []);
+
+  const phase: Phase = hud.phase;
 
   return (
     <div
@@ -80,12 +80,113 @@ export default function SahurGame() {
             reducedMotion={reducedMotion}
           />
         </Canvas>
+
+        {/* Score HUD */}
+        <div
+          aria-live="polite"
+          style={{
+            position: "absolute",
+            top: 16,
+            left: 18,
+            pointerEvents: "none",
+            fontFamily: "var(--font-hud)",
+            fontSize: 16,
+            lineHeight: 1.35,
+            zIndex: 2,
+          }}
+        >
+          <div style={{ color: "var(--score)" }}>
+            SCORE {Math.floor(hud.score)}
+          </div>
+          <div style={{ color: "var(--ash-muted)", fontSize: 14 }}>
+            BEST {Math.floor(hud.highScore)}
+          </div>
+        </div>
+
+        {phase === "start" && (
+          <Overlay>
+            <p
+              style={{
+                margin: 0,
+                color: "var(--score)",
+                fontFamily: "var(--font-hud)",
+                fontSize: 18,
+              }}
+            >
+              WASD to move · survive the bats
+            </p>
+            <p
+              style={{
+                margin: "0.75rem 0 0",
+                color: "var(--ash-muted)",
+                fontFamily: "var(--font-hud)",
+                fontSize: 13,
+              }}
+            >
+              space / tap to start
+            </p>
+          </Overlay>
+        )}
+
+        {phase === "dead" && (
+          <Overlay danger>
+            <p
+              style={{
+                margin: 0,
+                color: "var(--danger)",
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(1.6rem, 5vw, 2rem)",
+                letterSpacing: "0.06em",
+              }}
+            >
+              BONKED
+            </p>
+            <p
+              style={{
+                margin: "0.85rem 0 0",
+                color: "var(--ash)",
+                fontFamily: "var(--font-hud)",
+                fontSize: 15,
+              }}
+            >
+              survived {Math.floor(hud.score)} · space / tap to restart
+            </p>
+          </Overlay>
+        )}
       </div>
       <MobileControls
         onDir={onDir}
         onRestart={onRestart}
-        dead={phaseUi === "dead"}
+        dead={phase === "dead"}
       />
+    </div>
+  );
+}
+
+function Overlay({
+  children,
+  danger = false,
+}: {
+  children: React.ReactNode;
+  danger?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "grid",
+        placeItems: "center",
+        background: danger
+          ? "rgba(5, 5, 6, 0.55)"
+          : "rgba(5, 5, 6, 0.48)",
+        pointerEvents: "none",
+        zIndex: 3,
+        textAlign: "center",
+        padding: "1rem",
+      }}
+    >
+      <div>{children}</div>
     </div>
   );
 }
