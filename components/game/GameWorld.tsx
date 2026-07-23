@@ -239,12 +239,12 @@ export default function GameWorld({
         ? (Math.random() - 0.5) * shake.current * 2 * motionScale
         : 0;
 
-    const camX = CAMERA_POS[0] + a.x * 0.18 + sx;
-    const camZ = CAMERA_POS[2] + a.z * 0.12 + sz;
+    const camX = CAMERA_POS[0] + a.x * 0.22 + sx;
+    const camZ = CAMERA_POS[2] + a.z * 0.16 + sz;
     camera.position.x += (camX - camera.position.x) * Math.min(1, dt * 3);
     camera.position.z += (camZ - camera.position.z) * Math.min(1, dt * 3);
-    camera.position.y = CAMERA_POS[1];
-    camera.lookAt(a.x * 0.35, 0.5, a.z * 0.35);
+    camera.position.y = CAMERA_POS[1] + a.moveAmount * 0.35;
+    camera.lookAt(a.x * 0.4, 1.4, a.z * 0.4);
 
     hudTick.current += dt;
     if (phaseRef.current === "playing" && hudTick.current > 0.1) {
