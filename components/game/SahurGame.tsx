@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { clamp, facingFromVelocity, type Facing } from "./math";
 import { drawArena, drawObstacle, drawSahur } from "./draw";
 import {
@@ -11,6 +11,7 @@ import {
   updateObstacles,
   type Obstacle,
 } from "./obstacles";
+import MobileControls from "./MobileControls";
 
 const MAX_SPEED = 260;
 const ACCEL = 980;
@@ -19,10 +20,21 @@ const PLAYER_W = 40;
 const PLAYER_H = 70;
 
 type Keys = Record<string, boolean>;
-type Phase = "playing" | "dead";
+type Phase = "start" | "playing" | "dead";
 
 export default function SahurGame() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const virtualRef = useRef({ x: 0, y: 0 });
+  const [phaseUi, setPhaseUi] = useState<Phase>("start");
+  const restartRef = useRef<() => void>(() => {});
+
+  const onDir = useCallback((axis: "x" | "y", value: number) => {
+    virtualRef.current[axis] = value;
+  }, []);
+
+  const onRestart = useCallback(() => {
+    restartRef.current();
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -40,7 +52,7 @@ export default function SahurGame() {
       imgReady = true;
     };
 
-    let phase: Phase = "playing";
+    let phase: Phase = "start";
     let score = 0;
     let highScore = loadHighScore();
     let survived = 0;
@@ -64,7 +76,12 @@ export default function SahurGame() {
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    function resetGame() {
+    function setPhase(next: Phase) {
+      phase = next;
+      setPhaseUi(next);
+    }
+
+    function resetGame(toPlaying: boolean) {
       const w = canvas!.clientWidth;
       const h = canvas!.clientHeight;
       player.x = w * 0.5;
@@ -79,15 +96,18 @@ export default function SahurGame() {
       distance = 0;
       shake = 0;
       hitFlash = 0;
-      phase = "playing";
+      virtualRef.current = { x: 0, y: 0 };
+      setPhase(toPlaying ? "playing" : "start");
     }
+
+    restartRef.current = () => resetGame(true);
 
     function resize() {
       const parent = canvas!.parentElement;
       const w = parent?.clientWidth || window.innerWidth;
       const h = Math.max(
-        320,
-        parent?.clientHeight || Math.floor(window.innerHeight * 0.62),
+        280,
+        parent?.clientHeight || Math.floor(window.innerHeight * 0.55),
       );
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas!.width = Math.floor(w * dpr);
@@ -95,16 +115,16 @@ export default function SahurGame() {
       canvas!.style.width = `${w}px`;
       canvas!.style.height = `${h}px`;
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-      if (phase === "playing" && survived < 0.05) {
+      if (phase !== "playing") {
         player.x = w * 0.5;
         player.y = h * 0.72;
       }
     }
 
     function kill() {
-      if (phase === "dead") return;
-      phase = "dead";
-      shake = reducedMotion ? 4 : 14;
+      if (phase !== "playing") return;
+      setPhase("dead");
+      shake = reducedMotion ? 3 : 14;
       hitFlash = 1;
       if (score > highScore) {
         highScore = Math.floor(score);
@@ -112,8 +132,8 @@ export default function SahurGame() {
       }
     }
 
-    function restart() {
-      resetGame();
+    function beginOrRestart() {
+      if (phase === "start" || phase === "dead") resetGame(true);
     }
 
     function onKeyDown(e: KeyboardEvent) {
@@ -125,7 +145,15 @@ export default function SahurGame() {
       ) {
         e.preventDefault();
       }
-      if (e.code === "Space" && phase === "dead") restart();
+      if (e.code === "Space") beginOrRestart();
+      if (
+        phase === "start" &&
+        ["KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(
+          e.code,
+        )
+      ) {
+        resetGame(true);
+      }
     }
 
     function onKeyUp(e: KeyboardEvent) {
@@ -133,23 +161,42 @@ export default function SahurGame() {
     }
 
     function onPointer(e: PointerEvent) {
-      if (phase === "dead") {
+      if (phase === "start" || phase === "dead") {
         e.preventDefault();
-        restart();
+        beginOrRestart();
       }
+      canvas!.focus();
     }
 
     function inputAxis(): { x: number; y: number } {
-      let x = 0;
-      let y = 0;
+      let x = virtualRef.current.x;
+      let y = virtualRef.current.y;
       if (keys["KeyA"] || keys["ArrowLeft"]) x -= 1;
       if (keys["KeyD"] || keys["ArrowRight"]) x += 1;
       if (keys["KeyW"] || keys["ArrowUp"]) y -= 1;
       if (keys["KeyS"] || keys["ArrowDown"]) y += 1;
+      x = clamp(x, -1, 1);
+      y = clamp(y, -1, 1);
       return { x, y };
     }
 
-    function drawHud(w: number) {
+    function drawOverlay(w: number, h: number) {
+      if (phase === "start") {
+        ctx!.save();
+        ctx!.fillStyle = "rgba(5, 5, 6, 0.48)";
+        ctx!.fillRect(0, 0, w, h);
+        ctx!.textAlign = "center";
+        ctx!.fillStyle = "#d4b896";
+        ctx!.font = "18px Share Tech Mono, monospace";
+        ctx!.fillText("WASD to move · survive the bats", w / 2, h * 0.38);
+        ctx!.fillStyle = "#9a9590";
+        ctx!.font = "13px Share Tech Mono, monospace";
+        ctx!.fillText("space / tap to start", w / 2, h * 0.38 + 28);
+        ctx!.restore();
+      }
+    }
+
+    function drawHud(w: number, h: number) {
       ctx!.save();
       ctx!.font = "16px Share Tech Mono, monospace";
       ctx!.fillStyle = "#d4b896";
@@ -160,17 +207,17 @@ export default function SahurGame() {
 
       if (phase === "dead") {
         ctx!.fillStyle = "rgba(5, 5, 6, 0.55)";
-        ctx!.fillRect(0, 0, w, canvas!.clientHeight);
+        ctx!.fillRect(0, 0, w, h);
         ctx!.textAlign = "center";
         ctx!.fillStyle = "#c45c4a";
         ctx!.font = "28px Rubik Dirt, Impact, sans-serif";
-        ctx!.fillText("BONKED", w / 2, canvas!.clientHeight * 0.42);
+        ctx!.fillText("BONKED", w / 2, h * 0.42);
         ctx!.font = "15px Share Tech Mono, monospace";
         ctx!.fillStyle = "#e8e4df";
         ctx!.fillText(
           `survived ${Math.floor(score)} · space / tap to restart`,
           w / 2,
-          canvas!.clientHeight * 0.42 + 32,
+          h * 0.42 + 32,
         );
       }
       ctx!.restore();
@@ -184,7 +231,7 @@ export default function SahurGame() {
       const h = canvas!.clientHeight;
       const margin = 48;
       const groundTop = h * 0.48;
-      const motionScale = reducedMotion ? 0.25 : 1;
+      const motionScale = reducedMotion ? 0.2 : 1;
 
       if (phase === "playing") {
         const input = inputAxis();
@@ -223,9 +270,7 @@ export default function SahurGame() {
         }
         obstacles = updateObstacles(obstacles, dt, w, h);
 
-        if (
-          hitsPlayer(obstacles, player.x, player.y, PLAYER_W, PLAYER_H)
-        ) {
+        if (hitsPlayer(obstacles, player.x, player.y, PLAYER_W, PLAYER_H)) {
           kill();
         }
 
@@ -240,17 +285,11 @@ export default function SahurGame() {
         hitFlash = Math.max(0, hitFlash - dt * 1.8);
       }
 
-      if (shake > 0) {
-        shake = Math.max(0, shake - dt * 28);
-      }
+      if (shake > 0) shake = Math.max(0, shake - dt * 28);
       const sx =
-        shake > 0
-          ? (Math.random() - 0.5) * shake * 2 * motionScale
-          : 0;
+        shake > 0 ? (Math.random() - 0.5) * shake * 2 * motionScale : 0;
       const sy =
-        shake > 0
-          ? (Math.random() - 0.5) * shake * 2 * motionScale
-          : 0;
+        shake > 0 ? (Math.random() - 0.5) * shake * 2 * motionScale : 0;
 
       drawArena(ctx!, w, h, sx, sy);
 
@@ -282,17 +321,20 @@ export default function SahurGame() {
         ctx!.fillRect(player.x - 20 + sx, player.y - 60 + sy, 40, 60);
       }
 
-      drawHud(w);
+      drawHud(w, h);
+      drawOverlay(w, h);
       raf = requestAnimationFrame(tick);
     }
 
     resize();
-    resetGame();
+    resetGame(false);
     window.addEventListener("resize", resize);
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
     canvas.addEventListener("pointerdown", onPointer);
     raf = requestAnimationFrame(tick);
+    // auto-focus for keyboard
+    canvas.focus();
 
     return () => {
       cancelAnimationFrame(raf);
@@ -304,19 +346,28 @@ export default function SahurGame() {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      tabIndex={0}
-      aria-label="Tung Tung Tung Sahur arena. Use WASD or arrow keys to move. Space to restart after game over."
-      style={{
-        display: "block",
-        width: "100%",
-        height: "100%",
-        outline: "none",
-        cursor: "crosshair",
-        background: "#050506",
-        border: "1px solid rgba(196, 168, 130, 0.18)",
-      }}
-    />
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <canvas
+        ref={canvasRef}
+        tabIndex={0}
+        role="img"
+        aria-label="Tung Tung Tung Sahur arena. Use WASD or arrow keys to move. Space to start or restart. On mobile use the on-screen D-pad."
+        style={{
+          display: "block",
+          width: "100%",
+          flex: 1,
+          minHeight: 280,
+          outline: "none",
+          cursor: "crosshair",
+          background: "#050506",
+          border: "1px solid rgba(196, 168, 130, 0.18)",
+        }}
+      />
+      <MobileControls
+        onDir={onDir}
+        onRestart={onRestart}
+        dead={phaseUi === "dead"}
+      />
+    </div>
   );
 }
