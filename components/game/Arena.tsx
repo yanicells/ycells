@@ -27,8 +27,8 @@ export default function Arena() {
       />
       <directionalLight
         castShadow
-        position={[10, 18, 8]}
-        intensity={3.0}
+        position={[8, 16, 14]}
+        intensity={3.15}
         color="#fffaf4"
         shadow-mapSize={[2048, 2048]}
         shadow-camera-near={1}
@@ -41,12 +41,19 @@ export default function Arena() {
       />
       <directionalLight
         position={[-14, 10, -8]}
-        intensity={1.05}
+        intensity={0.95}
         color="#a8bcff"
+      />
+      {/* Face-forward fill so carved features catch light */}
+      <pointLight
+        position={[0, 6, 10]}
+        intensity={1.35}
+        color="#ffe8c8"
+        distance={28}
       />
       <pointLight
         position={[0, 9, 3]}
-        intensity={0.95}
+        intensity={0.75}
         color="#f0d2a8"
         distance={52}
       />
