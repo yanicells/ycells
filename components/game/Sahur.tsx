@@ -398,30 +398,56 @@ function Face() {
 function Eye({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      {/* Huge bulging sclera — meme-scale stare */}
-      <mesh castShadow scale={[1.15, 1.35, 1.25]}>
-        <sphereGeometry args={[0.22, 28, 28]} />
+      {/* Bulging sclera seated in socket — large but not floating orbs */}
+      <mesh castShadow scale={[1.05, 1.15, 1.1]} position={[0, 0, 0.02]}>
+        <sphereGeometry args={[0.155, 28, 28]} />
         <meshStandardMaterial
           color={EYE_WHITE}
-          roughness={0.08}
+          roughness={0.1}
           metalness={0.02}
         />
       </mesh>
-      {/* Dark iris ring under pupil for depth */}
-      <mesh position={[0.015, -0.015, 0.175]} scale={[1, 1.05, 0.55]}>
-        <sphereGeometry args={[0.095, 16, 16]} />
-        <meshStandardMaterial color="#2a221c" roughness={0.45} />
+
+      {/* Upper eyelid — wraps over top of sclera so eye is attached */}
+      <mesh
+        castShadow
+        position={[0, 0.1, 0.08]}
+        rotation={[0.55, 0, 0]}
+        scale={[1.15, 0.55, 0.85]}
+      >
+        <sphereGeometry
+          args={[0.14, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.55]}
+        />
+        <meshStandardMaterial color="#c9a078" roughness={0.42} />
       </mesh>
-      <mesh position={[0.02, -0.02, 0.2]}>
-        <sphereGeometry args={[0.078, 16, 16]} />
-        <meshStandardMaterial color={PUPIL} roughness={0.25} />
+      {/* Lower eyelid */}
+      <mesh
+        castShadow
+        position={[0, -0.09, 0.1]}
+        rotation={[-0.65, 0, 0]}
+        scale={[1.05, 0.45, 0.7]}
+      >
+        <sphereGeometry
+          args={[0.12, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.5]}
+        />
+        <meshStandardMaterial color="#c09070" roughness={0.48} />
       </mesh>
-      <mesh position={[-0.06, 0.06, 0.22]}>
-        <sphereGeometry args={[0.036, 8, 8]} />
+
+      {/* Iris + pupil — intense forward stare */}
+      <mesh position={[0.01, -0.01, 0.13]} scale={[1, 1.05, 0.55]}>
+        <sphereGeometry args={[0.072, 16, 16]} />
+        <meshStandardMaterial color="#2a221c" roughness={0.4} />
+      </mesh>
+      <mesh position={[0.012, -0.012, 0.155]}>
+        <sphereGeometry args={[0.055, 16, 16]} />
+        <meshStandardMaterial color={PUPIL} roughness={0.22} />
+      </mesh>
+      <mesh position={[-0.035, 0.035, 0.175]}>
+        <sphereGeometry args={[0.022, 8, 8]} />
         <meshBasicMaterial color="#ffffff" />
       </mesh>
-      <mesh position={[0.055, 0.01, 0.23]} scale={0.55}>
-        <sphereGeometry args={[0.024, 8, 8]} />
+      <mesh position={[0.035, 0.005, 0.18]} scale={0.5}>
+        <sphereGeometry args={[0.016, 8, 8]} />
         <meshBasicMaterial color="#ffffff" />
       </mesh>
     </group>
