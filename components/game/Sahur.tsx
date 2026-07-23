@@ -184,9 +184,11 @@ function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
   const { bind, position } = rig;
   const arr = position.array as Float32Array;
   const amp = THREE.MathUtils.clamp(moveAmount, 0, 1.6);
-  const legAmp = 1.15 * amp;
-  const armAmp = 0.95 * amp;
-  const hipZ = LEG_MAX_Z;
+  // Face looks down -Y in mesh space; stride along Y reads as depth, so also
+  // lift feet in Z and flare in X so the walk is obvious from the front camera.
+  const strideAmp = 0.55 * amp;
+  const liftAmp = 0.42 * amp;
+  const armAmp = 0.5 * amp;
 
   for (let i = 0; i < bind.length; i += 3) {
     const x = bind[i];
@@ -199,30 +201,22 @@ function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
     let oy = y;
     let oz = z;
 
-    // Legs + feet — opposite sides, opposite phase
+    // Legs + feet
     if (z < LEG_MAX_Z && radial > 0.18) {
-      const t = 1 - z / hipZ;
-      const ang = Math.sin(phase) * side * legAmp * t * t;
-      const c = Math.cos(ang);
-      const s = Math.sin(ang);
-      const lz = z - hipZ;
-      // Rotate around X through hip: swings forward/back in Y
-      oy = y * c - lz * s;
-      oz = y * s + lz * c + hipZ;
-      ox = x + side * t * 0.06 * amp;
+      const t = Math.pow(1 - z / LEG_MAX_Z, 1.35);
+      const stride = Math.sin(phase) * side;
+      oy = y - stride * strideAmp * t;
+      oz = z + Math.max(0, -Math.cos(phase) * side) * liftAmp * t;
+      ox = x + side * 0.05 * amp * t;
     }
 
-    // Arms + bat hand — counter-phase to legs; skip tight torso cylinder
+    // Arms + bat — counter-phase
     if (z > ARM_MIN_Z && z < ARM_MAX_Z && radial > TORSO_RADIUS) {
       const t = (z - ARM_MIN_Z) / (ARM_MAX_Z - ARM_MIN_Z);
-      const fall = t * (1 - t) * 4;
-      const ang = -Math.sin(phase) * side * armAmp * (0.35 + 0.65 * fall);
-      const c = Math.cos(ang);
-      const s = Math.sin(ang);
-      const shoulderZ = 3.35;
-      const lz = z - shoulderZ;
-      oy = y * c - lz * s;
-      oz = y * s + lz * c + shoulderZ;
+      const fall = Math.sin(Math.PI * t);
+      const stride = -Math.sin(phase) * side;
+      oy = y - stride * armAmp * fall;
+      oz = z + stride * 0.12 * amp * fall;
     }
 
     arr[i] = ox;
