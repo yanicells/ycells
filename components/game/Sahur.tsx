@@ -17,15 +17,17 @@ const MODEL_URL = "/models/sahur.glb";
 const LEG_MAX_Z = 1.55;
 const HIP_Z = 1.42;
 const LEG_CORE_RADIUS = 0.16;
-const ARM_MIN_Z = 1.85;
-const ARM_MAX_Z = 3.95;
+const ARM_MIN_Z = 1.75;
+const ARM_MAX_Z = 4.05;
 const SHOULDER_Z = 3.35;
 const TORSO_RADIUS = 0.68;
+/** Bat / stick can hang below the arm band — catch by outer radius. */
+const BAT_RADIUS = 0.92;
 /** Peak leg swing (rad) — bold so the cycle reads from the follow cam. */
-const LEG_STRIDE_RAD = 0.72;
-const LEG_LIFT = 0.55;
-const ARM_STRIDE_RAD = 0.95;
-const ARM_LIFT = 0.32;
+const LEG_STRIDE_RAD = 0.78;
+const LEG_LIFT = 0.62;
+const ARM_STRIDE_RAD = 1.05;
+const ARM_LIFT = 0.38;
 
 export type SahurAnimState = {
   x: number;
@@ -204,13 +206,18 @@ function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
     let oy = y;
     let oz = z;
 
+    // Bat hanging into the lower band — don't treat as a leg.
+    const isBat =
+      radial > BAT_RADIUS && z < ARM_MAX_Z && Math.abs(x) > 0.35;
+
     // Legs — rotate around hip in YZ so feet arc forward/back (toward -Y).
-    if (z < LEG_MAX_Z && radial > LEG_CORE_RADIUS) {
+    if (!isBat && z < LEG_MAX_Z && radial > LEG_CORE_RADIUS && Math.abs(x) > 0.1) {
       // Soft-skin near hip; full weight on shins/feet. Three.js smoothstep is (x,min,max).
       const attach =
         1 - THREE.MathUtils.smoothstep(z, LEG_MAX_Z - 0.42, LEG_MAX_Z);
       const mask = THREE.MathUtils.smoothstep(radial, LEG_CORE_RADIUS, 0.4);
-      const w = attach * mask;
+      const sideSep = THREE.MathUtils.smoothstep(Math.abs(x), 0.1, 0.28);
+      const w = attach * mask * sideSep;
       // Negative angle drives the foot toward -Y (facing direction).
       const theta = -sinP * side * legAng * w;
       const c = Math.cos(theta);
@@ -223,16 +230,23 @@ function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
       const liftGate = Math.max(0, -cosP * side);
       const foot = 1 - THREE.MathUtils.smoothstep(z, 0.15, 0.95);
       oz += liftGate * liftAmp * w * foot;
-      ox = x + side * 0.12 * amp * w;
+      ox = x + side * 0.14 * amp * w;
     }
 
     // Arms + bat — counter-phase shoulder pivot (opposite of legs).
-    if (z > ARM_MIN_Z && z < ARM_MAX_Z && radial > TORSO_RADIUS) {
-      const band = THREE.MathUtils.smoothstep(z, ARM_MIN_Z, ARM_MIN_Z + 0.35);
+    const inArmBand = z > ARM_MIN_Z && z < ARM_MAX_Z && radial > TORSO_RADIUS;
+    if (inArmBand || isBat) {
+      const band = inArmBand
+        ? THREE.MathUtils.smoothstep(z, ARM_MIN_Z, ARM_MIN_Z + 0.3)
+        : THREE.MathUtils.smoothstep(radial, BAT_RADIUS, BAT_RADIUS + 0.35);
       const top =
-        1 - THREE.MathUtils.smoothstep(z, ARM_MAX_Z - 0.35, ARM_MAX_Z);
-      const out = THREE.MathUtils.smoothstep(radial, TORSO_RADIUS, TORSO_RADIUS + 0.35);
-      const w = band * top * out;
+        1 - THREE.MathUtils.smoothstep(z, ARM_MAX_Z - 0.3, ARM_MAX_Z);
+      const out = THREE.MathUtils.smoothstep(
+        radial,
+        TORSO_RADIUS,
+        TORSO_RADIUS + 0.28,
+      );
+      const w = Math.min(1, band * top * out * (isBat ? 1.15 : 1));
       // Counter to legs: when that leg goes forward (-Y), this arm swings back (+Y).
       const theta = sinP * side * armAng * w;
       const c = Math.cos(theta);
@@ -244,7 +258,7 @@ function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
       // Slight upward flick + outward on the forward arm for bat read.
       const forwardGate = Math.max(0, sinP * side);
       oz += forwardGate * armLift * w;
-      ox = x + side * (0.1 + forwardGate * 0.14) * amp * w;
+      ox = x + side * (0.12 + forwardGate * 0.18) * amp * w;
     }
 
     arr[i] = ox;
