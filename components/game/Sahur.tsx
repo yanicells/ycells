@@ -429,8 +429,13 @@ function Face() {
           <meshStandardMaterial color="#4a3020" roughness={0.9} />
         </mesh>
       </group>
-      {/* Wide thin-lipped Mona Lisa smirk — upper + lower lip meshes */}
+      {/* Wide thin-lipped Mona Lisa smirk — closed, no dark open cavity */}
       <group position={[0.04, -0.38, 0.46]} rotation={[0.15, 0.08, -0.18]}>
+        {/* Flesh fill so lips read closed rather than an open hole */}
+        <mesh position={[0.03, -0.01, 0.01]} scale={[1.7, 0.55, 0.55]}>
+          <sphereGeometry args={[0.1, 14, 10]} />
+          <meshStandardMaterial color="#c9a078" roughness={0.5} />
+        </mesh>
         {/* Upper lip curve */}
         <mesh
           castShadow
