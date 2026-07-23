@@ -1,5 +1,5 @@
 /** Arena half-extent on X/Z (playable floor is ARENA_SIZE * 2). */
-export const ARENA_SIZE = 22;
+export const ARENA_SIZE = 36;
 
 export const MAX_SPEED = 8.5;
 export const ACCEL = 28;
