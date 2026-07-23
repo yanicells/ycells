@@ -23,11 +23,16 @@ const SHOULDER_Z = 3.35;
 const TORSO_RADIUS = 0.68;
 /** Bat / stick can hang below the arm band — catch by outer radius. */
 const BAT_RADIUS = 0.92;
-/** Peak leg swing (rad) — bold so the cycle reads from the follow cam. */
-const LEG_STRIDE_RAD = 0.78;
-const LEG_LIFT = 0.62;
-const ARM_STRIDE_RAD = 1.05;
-const ARM_LIFT = 0.38;
+/**
+ * Amps tuned for the elevated FRONT follow cam (depth foreshortens Y-stride).
+ * Prefer lift (Z) + lateral (X) so opposite legs read in silhouette.
+ */
+const LEG_STRIDE_RAD = 0.95;
+const LEG_LIFT = 1.05;
+const LEG_LATERAL = 0.42;
+const ARM_STRIDE_RAD = 1.15;
+const ARM_LIFT = 0.55;
+const ARM_LATERAL = 0.48;
 
 export type SahurAnimState = {
   x: number;
@@ -202,13 +207,15 @@ function applyLimbSwing(
   const legScale = moving ? 1 : 0.55;
   const armScale = moving ? 1 : 0.85;
   const legAng = LEG_STRIDE_RAD * amp * legScale;
-  const liftAmp = LEG_LIFT * amp * (moving ? 1 : 0.35);
+  const liftAmp = LEG_LIFT * amp * (moving ? 1 : 0.3);
+  const latAmp = LEG_LATERAL * amp * (moving ? 1 : 0.4);
   const armAng = ARM_STRIDE_RAD * amp * armScale;
-  const armLift = ARM_LIFT * amp * (moving ? 1 : 0.45);
+  const armLift = ARM_LIFT * amp * (moving ? 1 : 0.4);
+  const armLat = ARM_LATERAL * amp * (moving ? 1 : 0.5);
   const sinP = Math.sin(phase);
   const cosP = Math.cos(phase);
-  // Secondary harmonic = knee/elbow-ish crease while moving.
-  const kneeKick = moving ? Math.sin(phase * 2) * 0.18 * amp : 0;
+  // Secondary harmonic = knee crease on the swinging leg.
+  const kneeKick = moving ? Math.max(0, Math.sin(phase * 2)) * 0.28 * amp : 0;
 
   for (let i = 0; i < bind.length; i += 3) {
     const x = bind[i];
@@ -225,30 +232,36 @@ function applyLimbSwing(
     const isBat =
       radial > BAT_RADIUS && z < ARM_MAX_Z && Math.abs(x) > 0.35;
 
-    // Legs — rotate around hip in YZ so feet arc forward/back (toward -Y).
+    // Legs — hip pivot (YZ stride) + bold lift/lateral for front-cam read.
     if (!isBat && z < LEG_MAX_Z && radial > LEG_CORE_RADIUS && Math.abs(x) > 0.1) {
       // Soft-skin near hip; full weight on shins/feet. Three.js smoothstep is (x,min,max).
       const attach =
-        1 - THREE.MathUtils.smoothstep(z, LEG_MAX_Z - 0.42, LEG_MAX_Z);
-      const mask = THREE.MathUtils.smoothstep(radial, LEG_CORE_RADIUS, 0.4);
-      const sideSep = THREE.MathUtils.smoothstep(Math.abs(x), 0.1, 0.28);
+        1 - THREE.MathUtils.smoothstep(z, LEG_MAX_Z - 0.5, LEG_MAX_Z);
+      const mask = THREE.MathUtils.smoothstep(radial, LEG_CORE_RADIUS, 0.36);
+      const sideSep = THREE.MathUtils.smoothstep(Math.abs(x), 0.1, 0.26);
       const w = attach * mask * sideSep;
-      // Negative angle drives the foot toward -Y (facing direction).
       const shin =
         THREE.MathUtils.smoothstep(z, 0.05, 0.85) *
         (1 - THREE.MathUtils.smoothstep(z, 0.85, 1.35));
-      const theta = (-sinP * side * legAng + kneeKick * side * shin) * w;
+      // Swinging leg: phase where this side advances toward -Y.
+      const swingGate = Math.max(0, -cosP * side);
+      const plantGate = Math.max(0, cosP * side);
+      // Negative angle drives the foot toward -Y (facing direction).
+      const theta =
+        (-sinP * side * legAng + kneeKick * side * shin * swingGate) * w;
       const c = Math.cos(theta);
       const s = Math.sin(theta);
       const dy = y;
       const dz = z - HIP_Z;
       oy = dy * c - dz * s;
       oz = HIP_Z + dy * s + dz * c;
-      // Planted vs swinging foot: lift the one going forward.
-      const liftGate = Math.max(0, -cosP * side);
-      const foot = 1 - THREE.MathUtils.smoothstep(z, 0.15, 0.95);
-      oz += liftGate * liftAmp * w * foot;
-      ox = x + side * 0.14 * amp * w;
+      // Clear foot lift on the swinging leg (front-cam readable).
+      const foot = 1 - THREE.MathUtils.smoothstep(z, 0.1, 1.05);
+      oz += swingGate * liftAmp * w * foot;
+      // Planted leg compresses slightly — sells weight transfer.
+      oz -= plantGate * 0.12 * amp * w * foot;
+      // Lateral step so opposite legs diverge in silhouette.
+      ox = x + side * (0.16 + swingGate * latAmp) * amp * w;
     }
 
     // Arms + bat — counter-phase shoulder pivot (opposite of legs).
