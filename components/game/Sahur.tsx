@@ -122,9 +122,9 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
 
     const bob =
       Math.sin(phase.current * (moving ? 1 : 0.4)) *
-      (moving ? 0.07 : 0.04) *
+      (moving ? 0.09 : 0.035) *
       motion;
-    const lean = moving ? a.moveAmount * 0.1 * motion : 0;
+    const lean = moving ? a.moveAmount * 0.12 * motion : 0;
 
     if (body.current) {
       body.current.position.y = bob;
