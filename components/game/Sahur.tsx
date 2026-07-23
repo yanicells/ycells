@@ -586,33 +586,33 @@ function Foot({ side }: { side: number }) {
 
 function BatMesh() {
   return (
-    <group rotation={[0.15, 0, 0]}>
-      {/* Handle — thin grip */}
-      <mesh castShadow position={[0, 0.62, 0]}>
-        <cylinderGeometry args={[0.038, 0.045, 0.78, 12]} />
+    <group rotation={[0.1, 0, 0]}>
+      {/* Handle — gripped near top */}
+      <mesh castShadow position={[0, 0.85, 0]}>
+        <cylinderGeometry args={[0.042, 0.052, 0.95, 12]} />
         <meshStandardMaterial color="#6b4f35" roughness={0.48} />
       </mesh>
-      <mesh castShadow position={[0, 1.02, 0]}>
-        <sphereGeometry args={[0.052, 10, 10]} />
+      <mesh castShadow position={[0, 1.35, 0]}>
+        <sphereGeometry args={[0.06, 10, 10]} />
         <meshStandardMaterial color="#5a412c" roughness={0.52} />
       </mesh>
-      {/* Knob / transition into barrel */}
-      <mesh castShadow position={[0, 0.28, 0]}>
-        <cylinderGeometry args={[0.07, 0.045, 0.18, 14]} />
-        <meshStandardMaterial color="#8a6540" roughness={0.38} metalness={0.06} />
+      {/* Transition into barrel */}
+      <mesh castShadow position={[0, 0.35, 0]}>
+        <cylinderGeometry args={[0.09, 0.05, 0.28, 14]} />
+        <meshStandardMaterial color="#8a6540" roughness={0.36} metalness={0.06} />
       </mesh>
-      {/* Barrel — thick tip tapering toward handle */}
-      <mesh castShadow position={[0, -0.28, 0]}>
-        <cylinderGeometry args={[0.155, 0.072, 1.25, 18]} />
+      {/* Long barrel — thick tip tapering toward handle */}
+      <mesh castShadow position={[0, -0.45, 0]}>
+        <cylinderGeometry args={[0.2, 0.085, 1.55, 20]} />
         <meshStandardMaterial
-          color="#b88962"
-          roughness={0.28}
+          color="#c49a72"
+          roughness={0.26}
           metalness={0.1}
         />
       </mesh>
-      <mesh castShadow position={[0, -0.92, 0]}>
-        <sphereGeometry args={[0.155, 16, 14]} />
-        <meshStandardMaterial color="#a87852" roughness={0.26} metalness={0.08} />
+      <mesh castShadow position={[0, -1.25, 0]}>
+        <sphereGeometry args={[0.2, 18, 14]} />
+        <meshStandardMaterial color="#b88962" roughness={0.24} metalness={0.08} />
       </mesh>
     </group>
   );
