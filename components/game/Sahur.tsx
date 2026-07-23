@@ -102,8 +102,8 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
     phase.current += dt * (moving ? 8.5 + a.moveAmount * 3.5 : 2) * motion;
 
     if (root.current) {
-      // Feet rest on the floor (oversized soles)
-      root.current.position.set(a.x, 0.55, a.z);
+      // Feet rest on the floor (oversized soles) — scaled body sits higher
+      root.current.position.set(a.x, 0.72, a.z);
       root.current.rotation.y = a.yaw;
       const punch = a.hitFlash > 0 ? 1 + a.hitFlash * 0.07 : 1;
       root.current.scale.setScalar(punch);
@@ -146,17 +146,17 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
   });
 
   return (
-    <group ref={root} scale={1.15}>
+    <group ref={root} scale={1.55}>
       <group ref={body}>
         {/* Tall continuous kentongan body */}
         <mesh ref={bodyMesh} castShadow receiveShadow position={[0, 2.15, 0]}>
-          <cylinderGeometry args={[0.62, 0.66, 3.55, 48]} />
+          <cylinderGeometry args={[0.58, 0.64, 3.55, 48]} />
           <meshStandardMaterial
             map={bodyMat}
-            color="#d8b892"
-            roughness={0.32}
-            metalness={0.08}
-            envMapIntensity={0.7}
+            color="#e0c49c"
+            roughness={0.28}
+            metalness={0.06}
+            envMapIntensity={0.85}
           />
         </mesh>
 
@@ -239,54 +239,62 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
 
 function Face() {
   return (
-    <group position={[0, 2.95, 0.52]}>
-      {/* Facial plane carved into the cylinder */}
-      <mesh castShadow position={[0, -0.08, 0.02]}>
+    <group position={[0, 2.9, 0.48]}>
+      {/* Facial mound carved into the cylinder front */}
+      <mesh castShadow position={[0, -0.05, 0.04]}>
         <sphereGeometry
-          args={[0.42, 28, 20, 0, Math.PI * 2, 0, Math.PI * 0.62]}
+          args={[0.48, 32, 24, 0, Math.PI * 2, 0, Math.PI * 0.7]}
         />
-        <meshStandardMaterial color="#d4b090" roughness={0.38} metalness={0.04} />
+        <meshStandardMaterial color="#ddc09a" roughness={0.34} metalness={0.03} />
       </mesh>
 
-      {/* Brow ridge */}
-      <mesh position={[0, 0.2, 0.22]} scale={[1.15, 0.35, 0.55]}>
-        <sphereGeometry args={[0.22, 16, 12]} />
-        <meshStandardMaterial color={WOOD_MID} roughness={0.45} />
+      {/* Heavy brow */}
+      <mesh position={[0, 0.26, 0.28]} scale={[1.35, 0.32, 0.6]}>
+        <sphereGeometry args={[0.24, 18, 12]} />
+        <meshStandardMaterial color={WOOD_MID} roughness={0.42} />
       </mesh>
 
-      <Eye position={[-0.155, 0.08, 0.28]} />
-      <Eye position={[0.155, 0.08, 0.28]} />
+      <Eye position={[-0.18, 0.06, 0.36]} />
+      <Eye position={[0.18, 0.06, 0.36]} />
 
-      {/* Human nose */}
-      <group position={[0, -0.02, 0.34]} rotation={[0.25, 0, 0]}>
-        <mesh castShadow>
-          <capsuleGeometry args={[0.055, 0.14, 4, 10]} />
-          <meshStandardMaterial color={NOSE} roughness={0.42} />
+      {/* Human nose — strong bridge + tip */}
+      <group position={[0, -0.06, 0.42]} rotation={[0.2, 0, 0]}>
+        <mesh castShadow position={[0, 0.04, 0]}>
+          <capsuleGeometry args={[0.06, 0.16, 4, 12]} />
+          <meshStandardMaterial color={NOSE} roughness={0.4} />
         </mesh>
-        <mesh position={[-0.035, -0.1, 0.02]} scale={[0.7, 0.55, 0.6]}>
-          <sphereGeometry args={[0.035, 8, 8]} />
+        <mesh castShadow position={[0, -0.08, 0.04]} scale={[1.15, 0.7, 0.9]}>
+          <sphereGeometry args={[0.07, 12, 12]} />
+          <meshStandardMaterial color="#c49872" roughness={0.42} />
+        </mesh>
+        <mesh position={[-0.04, -0.12, 0.03]} scale={[0.65, 0.5, 0.55]}>
+          <sphereGeometry args={[0.04, 8, 8]} />
           <meshStandardMaterial color={FLESH_SHADOW} roughness={0.5} />
         </mesh>
-        <mesh position={[0.035, -0.1, 0.02]} scale={[0.7, 0.55, 0.6]}>
-          <sphereGeometry args={[0.035, 8, 8]} />
+        <mesh position={[0.04, -0.12, 0.03]} scale={[0.65, 0.5, 0.55]}>
+          <sphereGeometry args={[0.04, 8, 8]} />
           <meshStandardMaterial color={FLESH_SHADOW} roughness={0.5} />
         </mesh>
       </group>
 
       {/* Closed smirk */}
       <mesh
-        position={[0.04, -0.22, 0.3]}
-        rotation={[1.25, 0, -0.42]}
-        scale={[1.15, 0.65, 1]}
+        position={[0.05, -0.28, 0.38]}
+        rotation={[1.2, 0.05, -0.48]}
+        scale={[1.25, 0.7, 1]}
       >
-        <torusGeometry args={[0.1, 0.016, 8, 20, Math.PI * 0.9]} />
-        <meshStandardMaterial color={LIP} roughness={0.55} />
+        <torusGeometry args={[0.11, 0.018, 8, 24, Math.PI * 0.95]} />
+        <meshStandardMaterial color={LIP} roughness={0.52} />
       </mesh>
 
-      {/* Cheek */}
-      <mesh position={[0.22, -0.12, 0.22]} scale={[0.9, 0.75, 0.7]}>
+      {/* Cheeks */}
+      <mesh position={[0.26, -0.14, 0.26]} scale={[1, 0.8, 0.75]}>
+        <sphereGeometry args={[0.1, 12, 12]} />
+        <meshStandardMaterial color="#d0a880" roughness={0.48} />
+      </mesh>
+      <mesh position={[-0.24, -0.12, 0.24]} scale={[0.85, 0.7, 0.65]}>
         <sphereGeometry args={[0.08, 10, 10]} />
-        <meshStandardMaterial color="#c9a078" roughness={0.5} />
+        <meshStandardMaterial color="#d0a880" roughness={0.48} />
       </mesh>
     </group>
   );
@@ -295,27 +303,24 @@ function Face() {
 function Eye({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      {/* Bulging sclera */}
-      <mesh castShadow scale={[1.05, 1.15, 1.05]}>
-        <sphereGeometry args={[0.135, 20, 20]} />
+      <mesh castShadow scale={[1.1, 1.25, 1.15]}>
+        <sphereGeometry args={[0.155, 24, 24]} />
         <meshStandardMaterial
           color={EYE_WHITE}
-          roughness={0.12}
-          metalness={0.04}
+          roughness={0.1}
+          metalness={0.02}
         />
       </mesh>
-      {/* Iris / pupil */}
-      <mesh position={[0.015, -0.015, 0.11]}>
-        <sphereGeometry args={[0.055, 14, 14]} />
-        <meshStandardMaterial color={PUPIL} roughness={0.35} />
+      <mesh position={[0.02, -0.02, 0.13]}>
+        <sphereGeometry args={[0.062, 16, 16]} />
+        <meshStandardMaterial color={PUPIL} roughness={0.3} />
       </mesh>
-      {/* Specular catchlight */}
-      <mesh position={[-0.04, 0.045, 0.125]}>
-        <sphereGeometry args={[0.022, 8, 8]} />
+      <mesh position={[-0.05, 0.05, 0.145]}>
+        <sphereGeometry args={[0.028, 8, 8]} />
         <meshBasicMaterial color="#ffffff" />
       </mesh>
-      <mesh position={[0.04, 0.02, 0.13]} scale={0.55}>
-        <sphereGeometry args={[0.018, 8, 8]} />
+      <mesh position={[0.05, 0.015, 0.15]} scale={0.5}>
+        <sphereGeometry args={[0.02, 8, 8]} />
         <meshBasicMaterial color="#ffffff" />
       </mesh>
     </group>
@@ -324,31 +329,28 @@ function Eye({ position }: { position: [number, number, number] }) {
 
 function Foot({ side }: { side: number }) {
   return (
-    <group position={[0, -0.92, 0.12]} rotation={[0.1, side * 0.15, 0]}>
-      {/* Big sole */}
-      <mesh castShadow position={[0, 0, 0.12]} scale={[1.15, 0.42, 1.75]}>
-        <sphereGeometry args={[0.22, 14, 12]} />
-        <meshStandardMaterial color={FLESH} roughness={0.68} />
+    <group position={[0, -0.92, 0.14]} rotation={[0.12, side * 0.18, 0]}>
+      <mesh castShadow position={[0, 0, 0.14]} scale={[1.25, 0.4, 1.9]}>
+        <sphereGeometry args={[0.26, 16, 14]} />
+        <meshStandardMaterial color={FLESH} roughness={0.66} />
       </mesh>
-      {/* Heel */}
-      <mesh castShadow position={[0, 0.02, -0.16]} scale={[0.95, 0.55, 0.75]}>
-        <sphereGeometry args={[0.14, 12, 10]} />
-        <meshStandardMaterial color={FLESH_SHADOW} roughness={0.72} />
+      <mesh castShadow position={[0, 0.02, -0.18]} scale={[1, 0.55, 0.8]}>
+        <sphereGeometry args={[0.16, 12, 10]} />
+        <meshStandardMaterial color={FLESH_SHADOW} roughness={0.7} />
       </mesh>
-      {/* Toes */}
-      {[-0.12, -0.06, 0, 0.06, 0.12].map((x, i) => (
+      {[-0.14, -0.07, 0, 0.07, 0.14].map((x, i) => (
         <mesh
           key={i}
           castShadow
           position={[
             x + side * 0.02,
-            0.015,
-            0.38 - Math.abs(x) * 0.2,
+            0.02,
+            0.44 - Math.abs(x) * 0.22,
           ]}
-          scale={[0.75, 0.55, 0.95]}
+          scale={[0.8, 0.55, 1]}
         >
-          <sphereGeometry args={[0.055 - Math.abs(i - 2) * 0.005, 8, 8]} />
-          <meshStandardMaterial color={FLESH} roughness={0.7} />
+          <sphereGeometry args={[0.062 - Math.abs(i - 2) * 0.006, 8, 8]} />
+          <meshStandardMaterial color={FLESH} roughness={0.68} />
         </mesh>
       ))}
     </group>
