@@ -27,21 +27,21 @@ export function spawnObstacle(difficulty: number): Obstacle {
   const speed = 2.4 + difficulty * 0.55 + Math.random() * 1.2;
   const bound = ARENA_SIZE;
 
-  let w = 1.35;
-  let d = 0.75;
-  let h = 0.65;
+  let w = 1.7;
+  let d = 0.95;
+  let h = 0.8;
   if (kind === "cylinder") {
-    w = 0.85 + Math.random() * 0.35;
+    w = 1.15 + Math.random() * 0.45;
     d = w;
-    h = 1.7 + Math.random() * 0.7;
+    h = 2.2 + Math.random() * 0.9;
   } else if (kind === "block") {
-    w = 1.05 + Math.random() * 0.65;
-    d = 1.05 + Math.random() * 0.5;
-    h = 1.05 + Math.random() * 0.55;
+    w = 1.4 + Math.random() * 0.85;
+    d = 1.35 + Math.random() * 0.65;
+    h = 1.35 + Math.random() * 0.7;
   } else {
-    w = 1.7 + Math.random() * 0.55;
-    d = 0.5 + Math.random() * 0.22;
-    h = 0.42 + Math.random() * 0.18;
+    w = 2.2 + Math.random() * 0.7;
+    d = 0.65 + Math.random() * 0.28;
+    h = 0.55 + Math.random() * 0.22;
   }
 
   let x = 0;
