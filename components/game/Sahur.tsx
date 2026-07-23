@@ -19,10 +19,13 @@ const HIP_Z = 1.42;
 const LEG_CORE_RADIUS = 0.16;
 const ARM_MIN_Z = 1.85;
 const ARM_MAX_Z = 3.95;
+const SHOULDER_Z = 3.35;
 const TORSO_RADIUS = 0.68;
 /** Peak leg swing (rad) — bold so the cycle reads from the follow cam. */
 const LEG_STRIDE_RAD = 0.72;
 const LEG_LIFT = 0.55;
+const ARM_STRIDE_RAD = 0.95;
+const ARM_LIFT = 0.32;
 
 export type SahurAnimState = {
   x: number;
@@ -175,10 +178,11 @@ function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
   const { bind, position } = rig;
   const arr = position.array as Float32Array;
   const amp = THREE.MathUtils.clamp(moveAmount, 0, 1.8);
-  const armAmp = 0.85 * amp;
 
   const legAng = LEG_STRIDE_RAD * amp;
   const liftAmp = LEG_LIFT * amp;
+  const armAng = ARM_STRIDE_RAD * amp;
+  const armLift = ARM_LIFT * amp;
   const sinP = Math.sin(phase);
   const cosP = Math.cos(phase);
 
@@ -215,14 +219,25 @@ function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
       ox = x + side * 0.12 * amp * w;
     }
 
-    // Arms + bat — counter-phase (translation for now; shoulder pivot next)
+    // Arms + bat — counter-phase shoulder pivot (opposite of legs).
     if (z > ARM_MIN_Z && z < ARM_MAX_Z && radial > TORSO_RADIUS) {
-      const t = (z - ARM_MIN_Z) / (ARM_MAX_Z - ARM_MIN_Z);
-      const fall = Math.sin(Math.PI * Math.min(1, Math.max(0, t)));
-      const stride = -Math.sin(phase) * side;
-      oy = y - stride * armAmp * fall;
-      oz = z + stride * 0.2 * amp * fall;
-      ox = x + side * 0.04 * amp * fall;
+      const band = THREE.MathUtils.smoothstep(z, ARM_MIN_Z, ARM_MIN_Z + 0.35);
+      const top =
+        1 - THREE.MathUtils.smoothstep(z, ARM_MAX_Z - 0.35, ARM_MAX_Z);
+      const out = THREE.MathUtils.smoothstep(radial, TORSO_RADIUS, TORSO_RADIUS + 0.35);
+      const w = band * top * out;
+      // Counter to legs: when that leg goes forward (-Y), this arm swings back (+Y).
+      const theta = sinP * side * armAng * w;
+      const c = Math.cos(theta);
+      const s = Math.sin(theta);
+      const dy = y;
+      const dz = z - SHOULDER_Z;
+      oy = dy * c - dz * s;
+      oz = SHOULDER_Z + dy * s + dz * c;
+      // Slight upward flick + outward on the forward arm for bat read.
+      const forwardGate = Math.max(0, sinP * side);
+      oz += forwardGate * armLift * w;
+      ox = x + side * (0.1 + forwardGate * 0.14) * amp * w;
     }
 
     arr[i] = ox;
