@@ -385,27 +385,32 @@ function Foot({ side }: { side: number }) {
 function BatMesh() {
   return (
     <group rotation={[0.15, 0, 0]}>
-      {/* Handle */}
-      <mesh castShadow position={[0, 0.55, 0]}>
-        <cylinderGeometry args={[0.04, 0.048, 0.7, 12]} />
+      {/* Handle — thin grip */}
+      <mesh castShadow position={[0, 0.62, 0]}>
+        <cylinderGeometry args={[0.038, 0.045, 0.78, 12]} />
         <meshStandardMaterial color="#6b4f35" roughness={0.48} />
       </mesh>
-      <mesh castShadow position={[0, 0.92, 0]}>
-        <sphereGeometry args={[0.055, 10, 10]} />
+      <mesh castShadow position={[0, 1.02, 0]}>
+        <sphereGeometry args={[0.052, 10, 10]} />
         <meshStandardMaterial color="#5a412c" roughness={0.52} />
       </mesh>
-      {/* Barrel — thick toward tip */}
-      <mesh castShadow position={[0, -0.15, 0]}>
-        <cylinderGeometry args={[0.13, 0.065, 1.15, 16]} />
+      {/* Knob / transition into barrel */}
+      <mesh castShadow position={[0, 0.28, 0]}>
+        <cylinderGeometry args={[0.07, 0.045, 0.18, 14]} />
+        <meshStandardMaterial color="#8a6540" roughness={0.38} metalness={0.06} />
+      </mesh>
+      {/* Barrel — thick tip tapering toward handle */}
+      <mesh castShadow position={[0, -0.28, 0]}>
+        <cylinderGeometry args={[0.155, 0.072, 1.25, 18]} />
         <meshStandardMaterial
           color="#b88962"
-          roughness={0.3}
-          metalness={0.08}
+          roughness={0.28}
+          metalness={0.1}
         />
       </mesh>
-      <mesh castShadow position={[0, -0.75, 0]}>
-        <sphereGeometry args={[0.13, 14, 12]} />
-        <meshStandardMaterial color="#a87852" roughness={0.28} />
+      <mesh castShadow position={[0, -0.92, 0]}>
+        <sphereGeometry args={[0.155, 16, 14]} />
+        <meshStandardMaterial color="#a87852" roughness={0.26} metalness={0.08} />
       </mesh>
     </group>
   );
