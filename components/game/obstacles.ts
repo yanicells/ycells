@@ -24,7 +24,7 @@ let nextId = 1;
 export function spawnObstacle(difficulty: number): Obstacle {
   const kind = KINDS[Math.floor(Math.random() * KINDS.length)];
   const edge = Math.floor(Math.random() * 4);
-  const speed = 2.4 + difficulty * 0.55 + Math.random() * 1.2;
+  const speed = 3.1 + difficulty * 0.65 + Math.random() * 1.4;
   const bound = ARENA_SIZE;
 
   let w = 1.7;
@@ -92,7 +92,7 @@ export function updateObstacles(
   obstacles: Obstacle[],
   dt: number,
 ): Obstacle[] {
-  const limit = ARENA_SIZE + 4;
+  const limit = ARENA_SIZE + 8;
   return obstacles
     .map((o) => ({
       ...o,
