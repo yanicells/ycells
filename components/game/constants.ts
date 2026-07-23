@@ -9,8 +9,8 @@ export const PLAYER_RADIUS = 0.95;
 export const PLAYER_HEIGHT = 5.8;
 
 /** Soft elevated follow camera — framed for a tall Sahur in a wide arena. */
-export const CAMERA_POS: [number, number, number] = [0, 9.5, 13.5];
-export const CAMERA_TARGET: [number, number, number] = [0, 1.8, 0];
+export const CAMERA_POS: [number, number, number] = [0, 18, 26];
+export const CAMERA_TARGET: [number, number, number] = [0, 2.2, 0];
 
 /** Soft-void palette shared by arena + shell. */
 export const VOID_BG = "#14161f";
