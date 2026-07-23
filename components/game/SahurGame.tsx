@@ -63,15 +63,22 @@ export default function SahurGame() {
           <Canvas
             shadows
             dpr={[1, 2]}
-            gl={{ antialias: true, alpha: false }}
+            gl={{ antialias: true, alpha: false, preserveDrawingBuffer: true }}
+            resize={{ debounce: 0, scroll: false }}
             style={{ width: "100%", height: "100%", display: "block", outline: "none" }}
             role="img"
             aria-label="Tung Tung Tung Sahur 3D arena. Use WASD or arrow keys to move. Space to start or restart. On mobile use the on-screen D-pad."
+            onCreated={({ gl, size }) => {
+              gl.setClearColor("#0e0f14");
+              if (size.width > 0 && size.height > 0) {
+                gl.setSize(size.width, size.height, false);
+              }
+            }}
           >
             <PerspectiveCamera
               makeDefault
               position={CAMERA_POS}
-              fov={38}
+              fov={34}
               near={0.1}
               far={120}
             />
@@ -115,6 +122,7 @@ export default function SahurGame() {
                 color: "var(--score)",
                 fontFamily: "var(--font-hud)",
                 fontSize: 18,
+                textShadow: "0 2px 12px rgba(0,0,0,0.65)",
               }}
             >
               WASD to move · survive the bats
@@ -125,6 +133,7 @@ export default function SahurGame() {
                 color: "var(--ash-muted)",
                 fontFamily: "var(--font-hud)",
                 fontSize: 13,
+                textShadow: "0 2px 10px rgba(0,0,0,0.55)",
               }}
             >
               space / tap to start
@@ -179,15 +188,16 @@ function Overlay({
       style={{
         position: "absolute",
         inset: 0,
-        display: "grid",
-        placeItems: "center",
+        display: "flex",
+        alignItems: danger ? "center" : "flex-end",
+        justifyContent: "center",
         background: danger
-          ? "rgba(14, 15, 20, 0.58)"
-          : "rgba(14, 15, 20, 0.42)",
+          ? "rgba(20, 22, 31, 0.45)"
+          : "linear-gradient(to top, rgba(20,22,31,0.72) 0%, rgba(20,22,31,0.08) 42%, transparent 70%)",
         pointerEvents: "none",
         zIndex: 3,
         textAlign: "center",
-        padding: "1rem",
+        padding: danger ? "1rem" : "0 1rem 1.75rem",
       }}
     >
       <div>{children}</div>
