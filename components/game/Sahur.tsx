@@ -231,32 +231,57 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
 
         <Face />
 
-        {/* Left arm — empty spindly stick */}
-        <group ref={leftArm} position={[-0.68, 2.55, 0.05]}>
-          <mesh castShadow rotation={[0.15, 0, 0.42]} position={[-0.08, -0.55, 0]}>
-            <cylinderGeometry args={[0.022, 0.03, 1.4, 8]} />
+        {/* Left arm — empty spindly stick with elbow */}
+        <group ref={leftArm} position={[-0.72, 2.95, 0.05]}>
+          <mesh castShadow rotation={[0.15, 0, 0.42]} position={[-0.05, -0.28, 0]}>
+            <cylinderGeometry args={[0.02, 0.028, 0.65, 8]} />
             <meshStandardMaterial color={WOOD_DARK} roughness={0.42} metalness={0.06} />
           </mesh>
-          <mesh castShadow position={[-0.38, -1.22, 0.08]}>
-            <sphereGeometry args={[0.07, 12, 12]} />
+          <mesh castShadow position={[-0.22, -0.62, 0.04]}>
+            <sphereGeometry args={[0.045, 10, 10]} />
+            <meshStandardMaterial color={WOOD_MID} roughness={0.45} />
+          </mesh>
+          <mesh castShadow rotation={[0.35, 0, 0.35]} position={[-0.32, -0.95, 0.08]}>
+            <cylinderGeometry args={[0.018, 0.024, 0.7, 8]} />
+            <meshStandardMaterial color={WOOD_DARK} roughness={0.44} metalness={0.05} />
+          </mesh>
+          <mesh castShadow position={[-0.48, -1.32, 0.14]}>
+            <sphereGeometry args={[0.068, 12, 12]} />
             <meshStandardMaterial color={FLESH} roughness={0.62} />
           </mesh>
         </group>
 
         {/* Right arm — holds the bat */}
-        <group ref={rightArm} position={[0.68, 2.55, 0.05]}>
-          <mesh castShadow rotation={[0.2, 0, -0.38]} position={[0.08, -0.55, 0]}>
-            <cylinderGeometry args={[0.022, 0.03, 1.4, 8]} />
+        <group ref={rightArm} position={[0.72, 2.95, 0.05]}>
+          <mesh castShadow rotation={[0.2, 0, -0.38]} position={[0.05, -0.28, 0]}>
+            <cylinderGeometry args={[0.02, 0.028, 0.65, 8]} />
             <meshStandardMaterial color={WOOD_DARK} roughness={0.42} metalness={0.06} />
           </mesh>
-          <mesh castShadow position={[0.36, -1.22, 0.1]}>
-            <sphereGeometry args={[0.07, 12, 12]} />
+          <mesh castShadow position={[0.22, -0.62, 0.04]}>
+            <sphereGeometry args={[0.045, 10, 10]} />
+            <meshStandardMaterial color={WOOD_MID} roughness={0.45} />
+          </mesh>
+          <mesh castShadow rotation={[0.45, 0, -0.3]} position={[0.32, -0.95, 0.1]}>
+            <cylinderGeometry args={[0.018, 0.024, 0.7, 8]} />
+            <meshStandardMaterial color={WOOD_DARK} roughness={0.44} metalness={0.05} />
+          </mesh>
+          <mesh castShadow position={[0.46, -1.32, 0.16]}>
+            <sphereGeometry args={[0.068, 12, 12]} />
             <meshStandardMaterial color={FLESH} roughness={0.62} />
+          </mesh>
+          {/* Simple fingers gripping the bat */}
+          <mesh castShadow position={[0.5, -1.4, 0.22]} rotation={[0.4, 0, 0.2]}>
+            <capsuleGeometry args={[0.018, 0.08, 2, 6]} />
+            <meshStandardMaterial color={FLESH} roughness={0.65} />
+          </mesh>
+          <mesh castShadow position={[0.54, -1.38, 0.18]} rotation={[0.2, 0, 0.55]}>
+            <capsuleGeometry args={[0.016, 0.07, 2, 6]} />
+            <meshStandardMaterial color={FLESH} roughness={0.65} />
           </mesh>
           <group
             ref={bat}
-            position={[0.42, -1.35, 0.18]}
-            rotation={[0.35, -0.15, 0.55]}
+            position={[0.52, -1.48, 0.22]}
+            rotation={[0.85, -0.2, 0.65]}
           >
             <BatMesh />
           </group>
