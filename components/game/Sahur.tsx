@@ -172,8 +172,8 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
         </mesh>
 
         {/* Flat-topped kentongan rim with subtle hollow */}
-        <mesh castShadow position={[0, 3.95, 0]}>
-          <cylinderGeometry args={[0.64, 0.58, 0.14, 48]} />
+        <mesh castShadow position={[0, 4.45, 0]}>
+          <cylinderGeometry args={[0.68, 0.62, 0.14, 48]} />
           <meshStandardMaterial
             map={bodyMat}
             color={WOOD}
@@ -181,16 +181,16 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
             metalness={0.1}
           />
         </mesh>
-        <mesh position={[0, 4.03, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.54, 0.05, 12, 48]} />
+        <mesh position={[0, 4.53, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.58, 0.05, 12, 48]} />
           <meshStandardMaterial color={WOOD_MID} roughness={0.38} metalness={0.06} />
         </mesh>
-        <mesh position={[0, 4.02, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.5, 36]} />
+        <mesh position={[0, 4.52, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.54, 36]} />
           <meshStandardMaterial color={WOOD_DEEP} roughness={0.78} side={THREE.DoubleSide} />
         </mesh>
-        <mesh position={[0, 3.98, 0]}>
-          <cylinderGeometry args={[0.36, 0.4, 0.08, 28]} />
+        <mesh position={[0, 4.48, 0]}>
+          <cylinderGeometry args={[0.38, 0.42, 0.08, 28]} />
           <meshStandardMaterial color="#5a4030" roughness={0.85} />
         </mesh>
 
