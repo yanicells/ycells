@@ -88,7 +88,8 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
     phase.current += dt * (moving ? 9 + a.moveAmount * 4 : 2.2) * motion;
 
     if (root.current) {
-      root.current.position.set(a.x, 0, a.z);
+      // Lift so oversized feet sit on the arena floor
+      root.current.position.set(a.x, 0.36, a.z);
       root.current.rotation.y = a.yaw;
       const punch = a.hitFlash > 0 ? 1 + a.hitFlash * 0.08 : 1;
       root.current.scale.setScalar(punch);

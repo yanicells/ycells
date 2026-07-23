@@ -18,7 +18,7 @@ const SahurGame = dynamic(() => import("./SahurGame"), {
         background: "var(--void)",
       }}
     >
-      loading sahur…
+      summoning sahur…
     </div>
   ),
 });

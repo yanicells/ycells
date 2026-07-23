@@ -60,11 +60,11 @@ export default function GameWorld({
   const spawnTimer = useRef(0.8);
   const shake = useRef(0);
   const hudTick = useRef(0);
-  const gl = useThree((s) => s.gl);
-  const camera = useThree((s) => s.camera);
+  const getGl = useThree((s) => s.gl);
 
   useEffect(() => {
     scoreRef.current.high = loadHighScore();
+    const canvas = getGl.domElement;
 
     function resetGame(toPlaying: boolean) {
       anim.current = {
@@ -134,29 +134,30 @@ export default function GameWorld({
       if (phaseRef.current === "start" || phaseRef.current === "dead") {
         beginOrRestart();
       }
-      gl.domElement.focus();
+      canvas.focus();
     }
 
+    canvas.setAttribute("tabindex", "0");
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
-    gl.domElement.addEventListener("pointerdown", onPointer);
-    gl.domElement.tabIndex = 0;
-    gl.domElement.focus();
+    canvas.addEventListener("pointerdown", onPointer);
+    canvas.focus();
 
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
-      gl.domElement.removeEventListener("pointerdown", onPointer);
+      canvas.removeEventListener("pointerdown", onPointer);
     };
-  }, [gl, onHud, restartRef, virtualRef]);
+  }, [getGl, onHud, restartRef, virtualRef]);
 
-  useFrame((_, dtRaw) => {
+  useFrame((state, dtRaw) => {
     const dt = Math.min(0.033, dtRaw);
     const a = anim.current;
     const v = vel.current;
     const margin = ARENA_SIZE - 0.7;
     const keys = keysRef.current;
     const motionScale = reducedMotion ? 0.2 : 1;
+    const { camera } = state;
 
     if (phaseRef.current === "playing") {
       let ix = virtualRef.current.x;
@@ -245,7 +246,6 @@ export default function GameWorld({
     camera.position.y = CAMERA_POS[1];
     camera.lookAt(a.x * 0.35, 0.5, a.z * 0.35);
 
-    // Throttle HUD score updates while playing
     hudTick.current += dt;
     if (phaseRef.current === "playing" && hudTick.current > 0.1) {
       hudTick.current = 0;
