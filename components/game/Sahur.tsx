@@ -12,11 +12,17 @@ const MODEL_URL = "/models/sahur.glb";
 /**
  * Mesh-local Z is height on this Sketchfab export (feet≈0, head≈5.85).
  * Limb swing is a fake walk cycle — the GLB has no skeleton/animations.
+ * Face ≈ -Y; stride rotates limbs in the YZ plane (around local X).
  */
 const LEG_MAX_Z = 1.55;
+const HIP_Z = 1.42;
+const LEG_CORE_RADIUS = 0.16;
 const ARM_MIN_Z = 1.85;
 const ARM_MAX_Z = 3.95;
 const TORSO_RADIUS = 0.68;
+/** Peak leg swing (rad) — bold so the cycle reads from the follow cam. */
+const LEG_STRIDE_RAD = 0.72;
+const LEG_LIFT = 0.55;
 
 export type SahurAnimState = {
   x: number;
@@ -169,9 +175,12 @@ function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
   const { bind, position } = rig;
   const arr = position.array as Float32Array;
   const amp = THREE.MathUtils.clamp(moveAmount, 0, 1.8);
-  const strideAmp = 0.95 * amp;
-  const liftAmp = 0.75 * amp;
   const armAmp = 0.85 * amp;
+
+  const legAng = LEG_STRIDE_RAD * amp;
+  const liftAmp = LEG_LIFT * amp;
+  const sinP = Math.sin(phase);
+  const cosP = Math.cos(phase);
 
   for (let i = 0; i < bind.length; i += 3) {
     const x = bind[i];
@@ -184,16 +193,29 @@ function applyLimbSwing(rig: LimbRig, phase: number, moveAmount: number) {
     let oy = y;
     let oz = z;
 
-    // Legs + feet — stride in Y, lift in Z (visible from front camera)
-    if (z < LEG_MAX_Z && radial > 0.16) {
-      const t = Math.pow(1 - z / LEG_MAX_Z, 1.25);
-      const stride = Math.sin(phase) * side;
-      oy = y - stride * strideAmp * t;
-      oz = z + Math.max(0, -Math.cos(phase) * side) * liftAmp * t;
-      ox = x + side * 0.08 * amp * t;
+    // Legs — rotate around hip in YZ so feet arc forward/back (toward -Y).
+    if (z < LEG_MAX_Z && radial > LEG_CORE_RADIUS) {
+      // Soft-skin near hip; full weight on shins/feet. Three.js smoothstep is (x,min,max).
+      const attach =
+        1 - THREE.MathUtils.smoothstep(z, LEG_MAX_Z - 0.42, LEG_MAX_Z);
+      const mask = THREE.MathUtils.smoothstep(radial, LEG_CORE_RADIUS, 0.4);
+      const w = attach * mask;
+      // Negative angle drives the foot toward -Y (facing direction).
+      const theta = -sinP * side * legAng * w;
+      const c = Math.cos(theta);
+      const s = Math.sin(theta);
+      const dy = y;
+      const dz = z - HIP_Z;
+      oy = dy * c - dz * s;
+      oz = HIP_Z + dy * s + dz * c;
+      // Planted vs swinging foot: lift the one going forward.
+      const liftGate = Math.max(0, -cosP * side);
+      const foot = 1 - THREE.MathUtils.smoothstep(z, 0.15, 0.95);
+      oz += liftGate * liftAmp * w * foot;
+      ox = x + side * 0.12 * amp * w;
     }
 
-    // Arms + bat — counter-phase
+    // Arms + bat — counter-phase (translation for now; shoulder pivot next)
     if (z > ARM_MIN_Z && z < ARM_MAX_Z && radial > TORSO_RADIUS) {
       const t = (z - ARM_MIN_Z) / (ARM_MAX_Z - ARM_MIN_Z);
       const fall = Math.sin(Math.PI * Math.min(1, Math.max(0, t)));
