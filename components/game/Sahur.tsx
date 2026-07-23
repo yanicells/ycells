@@ -31,45 +31,56 @@ type SahurProps = {
 function makeWoodGrainTexture(): THREE.CanvasTexture | null {
   if (typeof document === "undefined") return null;
   const canvas = document.createElement("canvas");
-  canvas.width = 128;
+  canvas.width = 256;
   canvas.height = 512;
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
 
-  const g = ctx.createLinearGradient(0, 0, 128, 0);
-  g.addColorStop(0, "#b88962");
-  g.addColorStop(0.22, "#d2b08a");
-  g.addColorStop(0.48, "#e0c49c");
-  g.addColorStop(0.72, "#c9a078");
-  g.addColorStop(1, "#a87852");
+  const g = ctx.createLinearGradient(0, 0, 256, 0);
+  g.addColorStop(0, "#a87852");
+  g.addColorStop(0.18, "#c49a72");
+  g.addColorStop(0.4, "#e2c8a4");
+  g.addColorStop(0.55, "#f0d8b4");
+  g.addColorStop(0.72, "#d2b08a");
+  g.addColorStop(0.9, "#b88962");
+  g.addColorStop(1, "#9a7352");
   ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 128, 512);
+  ctx.fillRect(0, 0, 256, 512);
 
-  for (let i = 0; i < 36; i++) {
-    const x = Math.random() * 128;
-    ctx.strokeStyle = `rgba(80, 55, 35, ${0.06 + Math.random() * 0.14})`;
-    ctx.lineWidth = 0.5 + Math.random() * 1.4;
+  for (let i = 0; i < 48; i++) {
+    const x = Math.random() * 256;
+    ctx.strokeStyle = `rgba(70, 48, 28, ${0.05 + Math.random() * 0.12})`;
+    ctx.lineWidth = 0.4 + Math.random() * 1.6;
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.bezierCurveTo(
-      x + (Math.random() - 0.5) * 8,
-      170,
       x + (Math.random() - 0.5) * 10,
+      170,
+      x + (Math.random() - 0.5) * 14,
       340,
-      x + (Math.random() - 0.5) * 6,
+      x + (Math.random() - 0.5) * 8,
       512,
     );
     ctx.stroke();
   }
 
-  for (let i = 0; i < 8; i++) {
-    const y = 40 + Math.random() * 430;
-    ctx.strokeStyle = `rgba(110, 80, 50, ${0.08 + Math.random() * 0.1})`;
-    ctx.lineWidth = 0.4;
+  for (let i = 0; i < 12; i++) {
+    const y = 30 + Math.random() * 450;
+    ctx.strokeStyle = `rgba(100, 72, 45, ${0.07 + Math.random() * 0.1})`;
+    ctx.lineWidth = 0.45;
     ctx.beginPath();
-    ctx.ellipse(64, y, 18 + Math.random() * 22, 3 + Math.random() * 4, 0, 0, Math.PI * 2);
+    ctx.ellipse(128, y, 28 + Math.random() * 40, 3 + Math.random() * 5, 0, 0, Math.PI * 2);
     ctx.stroke();
   }
+
+  // Soft polish highlight band
+  const shine = ctx.createLinearGradient(0, 0, 256, 0);
+  shine.addColorStop(0, "rgba(255,240,210,0)");
+  shine.addColorStop(0.45, "rgba(255,245,220,0.12)");
+  shine.addColorStop(0.55, "rgba(255,245,220,0.12)");
+  shine.addColorStop(1, "rgba(255,240,210,0)");
+  ctx.fillStyle = shine;
+  ctx.fillRect(0, 0, 256, 512);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = THREE.RepeatWrapping;
@@ -153,10 +164,10 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
           <cylinderGeometry args={[0.58, 0.64, 3.55, 48]} />
           <meshStandardMaterial
             map={bodyMat}
-            color="#e0c49c"
-            roughness={0.28}
-            metalness={0.06}
-            envMapIntensity={0.85}
+            color="#e8d0aa"
+            roughness={0.22}
+            metalness={0.08}
+            envMapIntensity={1.05}
           />
         </mesh>
 
