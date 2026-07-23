@@ -4,14 +4,16 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
-const WOOD = "#c4a882";
-const WOOD_DARK = "#8a6f52";
-const WOOD_DEEP = "#6b5340";
-const FLESH = "#d4a574";
-const FLESH_SHADOW = "#b88962";
-const EYE_WHITE = "#f5f2ea";
+const WOOD = "#d2b08a";
+const WOOD_MID = "#c49a72";
+const WOOD_DARK = "#9a7352";
+const WOOD_DEEP = "#6e5238";
+const FLESH = "#d8a878";
+const FLESH_SHADOW = "#b88860";
+const EYE_WHITE = "#f7f4ee";
 const PUPIL = "#1a1210";
-const LIP = "#5c4034";
+const LIP = "#6a4a3a";
+const NOSE = "#c9a078";
 
 export type SahurAnimState = {
   x: number;
@@ -26,49 +28,61 @@ type SahurProps = {
   reducedMotion?: boolean;
 };
 
-function woodMat(color = WOOD, gloss = 0.28) {
-  return (
-    <meshStandardMaterial
-      color={color}
-      roughness={gloss}
-      metalness={0.08}
-      envMapIntensity={0.6}
-    />
-  );
-}
-
 function makeWoodGrainTexture(): THREE.CanvasTexture | null {
   if (typeof document === "undefined") return null;
   const canvas = document.createElement("canvas");
-  canvas.width = 64;
-  canvas.height = 256;
+  canvas.width = 128;
+  canvas.height = 512;
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
-  const g = ctx.createLinearGradient(0, 0, 64, 0);
-  g.addColorStop(0, "#b8956e");
-  g.addColorStop(0.35, "#c9ad88");
-  g.addColorStop(0.55, "#d4b896");
-  g.addColorStop(0.8, "#b8956e");
-  g.addColorStop(1, "#a07d5c");
+
+  const g = ctx.createLinearGradient(0, 0, 128, 0);
+  g.addColorStop(0, "#b88962");
+  g.addColorStop(0.22, "#d2b08a");
+  g.addColorStop(0.48, "#e0c49c");
+  g.addColorStop(0.72, "#c9a078");
+  g.addColorStop(1, "#a87852");
   ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 64, 256);
-  for (let i = 0; i < 18; i++) {
-    const x = Math.random() * 64;
-    ctx.strokeStyle = `rgba(90, 70, 48, ${0.08 + Math.random() * 0.12})`;
-    ctx.lineWidth = 0.6 + Math.random();
+  ctx.fillRect(0, 0, 128, 512);
+
+  for (let i = 0; i < 36; i++) {
+    const x = Math.random() * 128;
+    ctx.strokeStyle = `rgba(80, 55, 35, ${0.06 + Math.random() * 0.14})`;
+    ctx.lineWidth = 0.5 + Math.random() * 1.4;
     ctx.beginPath();
     ctx.moveTo(x, 0);
-    ctx.lineTo(x + (Math.random() - 0.5) * 4, 256);
+    ctx.bezierCurveTo(
+      x + (Math.random() - 0.5) * 8,
+      170,
+      x + (Math.random() - 0.5) * 10,
+      340,
+      x + (Math.random() - 0.5) * 6,
+      512,
+    );
     ctx.stroke();
   }
+
+  for (let i = 0; i < 8; i++) {
+    const y = 40 + Math.random() * 430;
+    ctx.strokeStyle = `rgba(110, 80, 50, ${0.08 + Math.random() * 0.1})`;
+    ctx.lineWidth = 0.4;
+    ctx.beginPath();
+    ctx.ellipse(64, y, 18 + Math.random() * 22, 3 + Math.random() * 4, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.ClampToEdgeWrapping;
   tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
   return tex;
 }
 
-/** Procedural Tung Tung Tung Sahur — cursed cylinder with stick limbs + bat. */
+/**
+ * Procedural Tung Tung Tung Sahur — tall kentongan body, bulging face,
+ * spindly limbs, oversized feet, wooden bat. Built to match the meme ref.
+ */
 export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
   const root = useRef<THREE.Group>(null);
   const body = useRef<THREE.Group>(null);
@@ -85,38 +99,38 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
     const a = anim.current;
     const motion = reducedMotion ? 0.15 : 1;
     const moving = a.moveAmount > 0.08;
-    phase.current += dt * (moving ? 9 + a.moveAmount * 4 : 2.2) * motion;
+    phase.current += dt * (moving ? 8.5 + a.moveAmount * 3.5 : 2) * motion;
 
     if (root.current) {
-      // Lift so oversized feet sit on the arena floor
-      root.current.position.set(a.x, 0.36, a.z);
+      // Feet rest on the floor (oversized soles)
+      root.current.position.set(a.x, 0.55, a.z);
       root.current.rotation.y = a.yaw;
-      const punch = a.hitFlash > 0 ? 1 + a.hitFlash * 0.08 : 1;
+      const punch = a.hitFlash > 0 ? 1 + a.hitFlash * 0.07 : 1;
       root.current.scale.setScalar(punch);
     }
 
     const bob =
-      Math.sin(phase.current * (moving ? 1 : 0.45)) *
-      (moving ? 0.06 : 0.035) *
+      Math.sin(phase.current * (moving ? 1 : 0.4)) *
+      (moving ? 0.07 : 0.04) *
       motion;
-    const lean = moving ? a.moveAmount * 0.12 * motion : 0;
+    const lean = moving ? a.moveAmount * 0.1 * motion : 0;
 
     if (body.current) {
       body.current.position.y = bob;
       body.current.rotation.x = lean;
       body.current.rotation.z =
-        Math.sin(phase.current * 0.5) * 0.03 * motion * (moving ? 1 : 0.4);
+        Math.sin(phase.current * 0.5) * 0.025 * motion * (moving ? 1 : 0.35);
     }
 
-    const swing = Math.sin(phase.current) * (moving ? 0.55 : 0.06) * motion;
+    const swing = Math.sin(phase.current) * (moving ? 0.5 : 0.05) * motion;
     if (leftLeg.current) leftLeg.current.rotation.x = swing;
     if (rightLeg.current) rightLeg.current.rotation.x = -swing;
-    if (leftArm.current) leftArm.current.rotation.x = -swing * 0.7;
-    if (rightArm.current) rightArm.current.rotation.x = swing * 0.55 - 0.25;
+    if (leftArm.current) leftArm.current.rotation.x = -swing * 0.65;
+    if (rightArm.current) rightArm.current.rotation.x = swing * 0.5 - 0.2;
     if (bat.current) {
       bat.current.rotation.z =
-        -0.35 + Math.sin(phase.current * 0.85) * 0.08 * motion;
-      bat.current.rotation.x = 0.15 + swing * 0.15;
+        -0.25 + Math.sin(phase.current * 0.8) * 0.07 * motion;
+      bat.current.rotation.x = 0.2 + swing * 0.12;
     }
 
     if (bodyMesh.current) {
@@ -132,65 +146,89 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
   });
 
   return (
-    <group ref={root}>
+    <group ref={root} scale={1.15}>
       <group ref={body}>
-        <mesh ref={bodyMesh} castShadow position={[0, 1.35, 0]}>
-          <cylinderGeometry args={[0.42, 0.44, 2.15, 32]} />
+        {/* Tall continuous kentongan body */}
+        <mesh ref={bodyMesh} castShadow receiveShadow position={[0, 2.15, 0]}>
+          <cylinderGeometry args={[0.62, 0.66, 3.55, 48]} />
           <meshStandardMaterial
             map={bodyMat}
-            color="#d2b48c"
+            color="#d8b892"
+            roughness={0.32}
+            metalness={0.08}
+            envMapIntensity={0.7}
+          />
+        </mesh>
+
+        {/* Domed top rim — slightly hollowed percussion look */}
+        <mesh castShadow position={[0, 3.95, 0]}>
+          <sphereGeometry args={[0.62, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          <meshStandardMaterial
+            map={bodyMat}
+            color={WOOD}
             roughness={0.28}
             metalness={0.1}
           />
         </mesh>
+        <mesh position={[0, 3.97, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.52, 0.045, 12, 48]} />
+          <meshStandardMaterial color={WOOD_MID} roughness={0.4} metalness={0.05} />
+        </mesh>
+        <mesh position={[0, 3.92, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.48, 32]} />
+          <meshStandardMaterial color={WOOD_DEEP} roughness={0.75} side={THREE.DoubleSide} />
+        </mesh>
 
-        <mesh castShadow position={[0, 2.42, 0]}>
-          <sphereGeometry args={[0.42, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          <meshStandardMaterial color={WOOD} roughness={0.25} metalness={0.1} />
+        {/* Soft belly taper / mid band */}
+        <mesh castShadow position={[0, 1.35, 0]}>
+          <torusGeometry args={[0.64, 0.04, 10, 40]} />
+          <meshStandardMaterial color={WOOD_DARK} roughness={0.45} metalness={0.05} />
         </mesh>
 
         <Face />
 
-        <group ref={leftArm} position={[-0.48, 1.55, 0]}>
-          <mesh castShadow rotation={[0, 0, 0.35]} position={[-0.05, -0.35, 0]}>
-            <cylinderGeometry args={[0.045, 0.05, 0.95, 8]} />
-            {woodMat(WOOD_DARK, 0.4)}
+        {/* Left arm — empty spindly stick */}
+        <group ref={leftArm} position={[-0.68, 2.55, 0.05]}>
+          <mesh castShadow rotation={[0.15, 0, 0.42]} position={[-0.08, -0.55, 0]}>
+            <cylinderGeometry args={[0.038, 0.048, 1.35, 8]} />
+            <meshStandardMaterial color={WOOD_DARK} roughness={0.42} metalness={0.06} />
           </mesh>
-          <mesh castShadow position={[-0.22, -0.82, 0.05]}>
-            <sphereGeometry args={[0.09, 10, 10]} />
-            <meshStandardMaterial color={FLESH} roughness={0.65} />
+          <mesh castShadow position={[-0.38, -1.2, 0.08]}>
+            <sphereGeometry args={[0.095, 12, 12]} />
+            <meshStandardMaterial color={FLESH} roughness={0.62} />
+          </mesh>
+        </group>
+
+        {/* Right arm — holds the bat */}
+        <group ref={rightArm} position={[0.68, 2.55, 0.05]}>
+          <mesh castShadow rotation={[0.2, 0, -0.38]} position={[0.08, -0.55, 0]}>
+            <cylinderGeometry args={[0.038, 0.048, 1.35, 8]} />
+            <meshStandardMaterial color={WOOD_DARK} roughness={0.42} metalness={0.06} />
+          </mesh>
+          <mesh castShadow position={[0.36, -1.2, 0.1]}>
+            <sphereGeometry args={[0.095, 12, 12]} />
+            <meshStandardMaterial color={FLESH} roughness={0.62} />
           </mesh>
           <group
             ref={bat}
-            position={[-0.28, -0.95, 0.12]}
-            rotation={[0.2, 0.4, -0.55]}
+            position={[0.42, -1.35, 0.18]}
+            rotation={[0.35, -0.15, 0.55]}
           >
             <BatMesh />
           </group>
         </group>
 
-        <group ref={rightArm} position={[0.48, 1.55, 0]}>
-          <mesh castShadow rotation={[0, 0, -0.28]} position={[0.05, -0.35, 0]}>
-            <cylinderGeometry args={[0.045, 0.05, 0.95, 8]} />
-            {woodMat(WOOD_DARK, 0.4)}
-          </mesh>
-          <mesh castShadow position={[0.2, -0.82, 0.02]}>
-            <sphereGeometry args={[0.085, 10, 10]} />
-            <meshStandardMaterial color={FLESH} roughness={0.65} />
-          </mesh>
-        </group>
-
-        <group ref={leftLeg} position={[-0.16, 0.28, 0]}>
-          <mesh castShadow position={[0, -0.28, 0]}>
-            <cylinderGeometry args={[0.05, 0.055, 0.7, 8]} />
-            {woodMat(WOOD_DEEP, 0.45)}
+        <group ref={leftLeg} position={[-0.22, 0.38, 0]}>
+          <mesh castShadow position={[0, -0.42, 0]}>
+            <cylinderGeometry args={[0.042, 0.05, 1.05, 8]} />
+            <meshStandardMaterial color={WOOD_DEEP} roughness={0.48} />
           </mesh>
           <Foot side={-1} />
         </group>
-        <group ref={rightLeg} position={[0.16, 0.28, 0]}>
-          <mesh castShadow position={[0, -0.28, 0]}>
-            <cylinderGeometry args={[0.05, 0.055, 0.7, 8]} />
-            {woodMat(WOOD_DEEP, 0.45)}
+        <group ref={rightLeg} position={[0.22, 0.38, 0]}>
+          <mesh castShadow position={[0, -0.42, 0]}>
+            <cylinderGeometry args={[0.042, 0.05, 1.05, 8]} />
+            <meshStandardMaterial color={WOOD_DEEP} roughness={0.48} />
           </mesh>
           <Foot side={1} />
         </group>
@@ -201,32 +239,54 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
 
 function Face() {
   return (
-    <group position={[0, 1.85, 0.38]}>
-      <mesh castShadow position={[0, -0.05, 0.02]}>
-        <sphereGeometry args={[0.28, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.65]} />
-        <meshStandardMaterial color="#c9ae8c" roughness={0.35} metalness={0.05} />
+    <group position={[0, 2.95, 0.52]}>
+      {/* Facial plane carved into the cylinder */}
+      <mesh castShadow position={[0, -0.08, 0.02]}>
+        <sphereGeometry
+          args={[0.42, 28, 20, 0, Math.PI * 2, 0, Math.PI * 0.62]}
+        />
+        <meshStandardMaterial color="#d4b090" roughness={0.38} metalness={0.04} />
       </mesh>
 
-      <Eye position={[-0.12, 0.08, 0.18]} />
-      <Eye position={[0.12, 0.08, 0.18]} />
-
-      <mesh castShadow position={[0, -0.02, 0.26]} rotation={[0.35, 0, 0]}>
-        <capsuleGeometry args={[0.045, 0.1, 4, 8]} />
-        <meshStandardMaterial color="#b8956e" roughness={0.4} />
+      {/* Brow ridge */}
+      <mesh position={[0, 0.2, 0.22]} scale={[1.15, 0.35, 0.55]}>
+        <sphereGeometry args={[0.22, 16, 12]} />
+        <meshStandardMaterial color={WOOD_MID} roughness={0.45} />
       </mesh>
 
+      <Eye position={[-0.155, 0.08, 0.28]} />
+      <Eye position={[0.155, 0.08, 0.28]} />
+
+      {/* Human nose */}
+      <group position={[0, -0.02, 0.34]} rotation={[0.25, 0, 0]}>
+        <mesh castShadow>
+          <capsuleGeometry args={[0.055, 0.14, 4, 10]} />
+          <meshStandardMaterial color={NOSE} roughness={0.42} />
+        </mesh>
+        <mesh position={[-0.035, -0.1, 0.02]} scale={[0.7, 0.55, 0.6]}>
+          <sphereGeometry args={[0.035, 8, 8]} />
+          <meshStandardMaterial color={FLESH_SHADOW} roughness={0.5} />
+        </mesh>
+        <mesh position={[0.035, -0.1, 0.02]} scale={[0.7, 0.55, 0.6]}>
+          <sphereGeometry args={[0.035, 8, 8]} />
+          <meshStandardMaterial color={FLESH_SHADOW} roughness={0.5} />
+        </mesh>
+      </group>
+
+      {/* Closed smirk */}
       <mesh
-        position={[0.02, -0.16, 0.24]}
-        rotation={[1.35, 0, -0.35]}
-        scale={[1.05, 0.7, 1]}
+        position={[0.04, -0.22, 0.3]}
+        rotation={[1.25, 0, -0.42]}
+        scale={[1.15, 0.65, 1]}
       >
-        <torusGeometry args={[0.09, 0.018, 8, 16, Math.PI * 0.85]} />
+        <torusGeometry args={[0.1, 0.016, 8, 20, Math.PI * 0.9]} />
         <meshStandardMaterial color={LIP} roughness={0.55} />
       </mesh>
 
-      <mesh position={[0.16, -0.1, 0.2]}>
-        <sphereGeometry args={[0.025, 8, 8]} />
-        <meshStandardMaterial color="#a88868" roughness={0.5} />
+      {/* Cheek */}
+      <mesh position={[0.22, -0.12, 0.22]} scale={[0.9, 0.75, 0.7]}>
+        <sphereGeometry args={[0.08, 10, 10]} />
+        <meshStandardMaterial color="#c9a078" roughness={0.5} />
       </mesh>
     </group>
   );
@@ -235,16 +295,27 @@ function Face() {
 function Eye({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      <mesh castShadow>
-        <sphereGeometry args={[0.095, 16, 16]} />
-        <meshStandardMaterial color={EYE_WHITE} roughness={0.15} metalness={0.05} />
+      {/* Bulging sclera */}
+      <mesh castShadow scale={[1.05, 1.15, 1.05]}>
+        <sphereGeometry args={[0.135, 20, 20]} />
+        <meshStandardMaterial
+          color={EYE_WHITE}
+          roughness={0.12}
+          metalness={0.04}
+        />
       </mesh>
-      <mesh position={[0.01, -0.01, 0.075]}>
-        <sphereGeometry args={[0.035, 12, 12]} />
-        <meshStandardMaterial color={PUPIL} roughness={0.4} />
+      {/* Iris / pupil */}
+      <mesh position={[0.015, -0.015, 0.11]}>
+        <sphereGeometry args={[0.055, 14, 14]} />
+        <meshStandardMaterial color={PUPIL} roughness={0.35} />
       </mesh>
-      <mesh position={[-0.03, 0.035, 0.085]}>
-        <sphereGeometry args={[0.015, 8, 8]} />
+      {/* Specular catchlight */}
+      <mesh position={[-0.04, 0.045, 0.125]}>
+        <sphereGeometry args={[0.022, 8, 8]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      <mesh position={[0.04, 0.02, 0.13]} scale={0.55}>
+        <sphereGeometry args={[0.018, 8, 8]} />
         <meshBasicMaterial color="#ffffff" />
       </mesh>
     </group>
@@ -253,24 +324,31 @@ function Eye({ position }: { position: [number, number, number] }) {
 
 function Foot({ side }: { side: number }) {
   return (
-    <group position={[0, -0.62, 0.08]} rotation={[0.08, side * 0.12, 0]}>
-      <mesh castShadow position={[0, 0, 0.08]} scale={[1.05, 0.45, 1.55]}>
-        <sphereGeometry args={[0.16, 12, 10]} />
-        <meshStandardMaterial color={FLESH} roughness={0.7} />
+    <group position={[0, -0.92, 0.12]} rotation={[0.1, side * 0.15, 0]}>
+      {/* Big sole */}
+      <mesh castShadow position={[0, 0, 0.12]} scale={[1.15, 0.42, 1.75]}>
+        <sphereGeometry args={[0.22, 14, 12]} />
+        <meshStandardMaterial color={FLESH} roughness={0.68} />
       </mesh>
-      <mesh castShadow position={[0, 0.01, -0.12]} scale={[0.9, 0.5, 0.7]}>
-        <sphereGeometry args={[0.1, 10, 8]} />
-        <meshStandardMaterial color={FLESH_SHADOW} roughness={0.75} />
+      {/* Heel */}
+      <mesh castShadow position={[0, 0.02, -0.16]} scale={[0.95, 0.55, 0.75]}>
+        <sphereGeometry args={[0.14, 12, 10]} />
+        <meshStandardMaterial color={FLESH_SHADOW} roughness={0.72} />
       </mesh>
-      {[-0.08, -0.04, 0, 0.04, 0.08].map((x, i) => (
+      {/* Toes */}
+      {[-0.12, -0.06, 0, 0.06, 0.12].map((x, i) => (
         <mesh
           key={i}
           castShadow
-          position={[x * side * 0.15 + x, 0.01, 0.28 - Math.abs(x) * 0.15]}
-          scale={[0.7, 0.55, 0.9]}
+          position={[
+            x + side * 0.02,
+            0.015,
+            0.38 - Math.abs(x) * 0.2,
+          ]}
+          scale={[0.75, 0.55, 0.95]}
         >
-          <sphereGeometry args={[0.045 - Math.abs(i - 2) * 0.004, 8, 8]} />
-          <meshStandardMaterial color={FLESH} roughness={0.72} />
+          <sphereGeometry args={[0.055 - Math.abs(i - 2) * 0.005, 8, 8]} />
+          <meshStandardMaterial color={FLESH} roughness={0.7} />
         </mesh>
       ))}
     </group>
@@ -279,22 +357,28 @@ function Foot({ side }: { side: number }) {
 
 function BatMesh() {
   return (
-    <group>
-      <mesh castShadow position={[0, 0.35, 0]}>
-        <cylinderGeometry args={[0.035, 0.04, 0.55, 10]} />
-        <meshStandardMaterial color="#6b4f35" roughness={0.45} />
+    <group rotation={[0.15, 0, 0]}>
+      {/* Handle */}
+      <mesh castShadow position={[0, 0.55, 0]}>
+        <cylinderGeometry args={[0.04, 0.048, 0.7, 12]} />
+        <meshStandardMaterial color="#6b4f35" roughness={0.48} />
       </mesh>
-      <mesh castShadow position={[0, 0.62, 0]}>
-        <sphereGeometry args={[0.05, 10, 10]} />
-        <meshStandardMaterial color="#5a412c" roughness={0.5} />
+      <mesh castShadow position={[0, 0.92, 0]}>
+        <sphereGeometry args={[0.055, 10, 10]} />
+        <meshStandardMaterial color="#5a412c" roughness={0.52} />
       </mesh>
-      <mesh castShadow position={[0, -0.25, 0]}>
-        <cylinderGeometry args={[0.09, 0.055, 0.85, 14]} />
-        <meshStandardMaterial color="#a67c52" roughness={0.32} metalness={0.08} />
+      {/* Barrel — thick toward tip */}
+      <mesh castShadow position={[0, -0.15, 0]}>
+        <cylinderGeometry args={[0.13, 0.065, 1.15, 16]} />
+        <meshStandardMaterial
+          color="#b88962"
+          roughness={0.3}
+          metalness={0.08}
+        />
       </mesh>
-      <mesh castShadow position={[0, -0.68, 0]}>
-        <sphereGeometry args={[0.09, 12, 10]} />
-        <meshStandardMaterial color="#9a724c" roughness={0.3} />
+      <mesh castShadow position={[0, -0.75, 0]}>
+        <sphereGeometry args={[0.13, 14, 12]} />
+        <meshStandardMaterial color="#a87852" roughness={0.28} />
       </mesh>
     </group>
   );
