@@ -400,14 +400,39 @@ function Face() {
           <meshStandardMaterial color="#4a3020" roughness={0.9} />
         </mesh>
       </group>
-      <mesh
-        position={[0.08, -0.4, 0.48]}
-        rotation={[1.05, 0.1, -0.55]}
-        scale={[1.55, 0.85, 1.1]}
-      >
-        <torusGeometry args={[0.14, 0.028, 8, 28, Math.PI * 0.95]} />
-        <meshStandardMaterial color={LIP} roughness={0.48} />
-      </mesh>
+      {/* Wide thin-lipped Mona Lisa smirk — upper + lower lip meshes */}
+      <group position={[0.04, -0.38, 0.46]} rotation={[0.15, 0.08, -0.18]}>
+        {/* Upper lip curve */}
+        <mesh
+          castShadow
+          position={[0.02, 0.02, 0.02]}
+          rotation={[1.35, 0.05, -0.35]}
+          scale={[1.65, 0.55, 0.9]}
+        >
+          <torusGeometry args={[0.16, 0.022, 8, 32, Math.PI * 0.85]} />
+          <meshStandardMaterial color={LIP} roughness={0.5} />
+        </mesh>
+        {/* Lower lip — slightly fuller */}
+        <mesh
+          castShadow
+          position={[0.02, -0.035, 0.03]}
+          rotation={[1.55, 0.05, -0.32]}
+          scale={[1.55, 0.7, 0.95]}
+        >
+          <torusGeometry args={[0.145, 0.028, 8, 28, Math.PI * 0.8]} />
+          <meshStandardMaterial color="#7a5545" roughness={0.52} />
+        </mesh>
+        {/* Lip corner dimples */}
+        <mesh position={[-0.12, -0.01, 0.04]} scale={[0.6, 0.45, 0.5]}>
+          <sphereGeometry args={[0.04, 8, 8]} />
+          <meshStandardMaterial color="#a07058" roughness={0.55} />
+        </mesh>
+        <mesh position={[0.18, -0.04, 0.02]} scale={[0.55, 0.4, 0.45]}>
+          <sphereGeometry args={[0.035, 8, 8]} />
+          <meshStandardMaterial color="#a07058" roughness={0.55} />
+        </mesh>
+      </group>
+
       <mesh position={[0.34, -0.16, 0.28]} scale={[1.15, 0.9, 0.75]}>
         <sphereGeometry args={[0.12, 12, 12]} />
         <meshStandardMaterial color="#d4ac88" roughness={0.46} />
