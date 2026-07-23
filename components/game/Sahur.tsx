@@ -157,7 +157,7 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
   });
 
   return (
-    <group ref={root} scale={1.55}>
+    <group ref={root} scale={1.85}>
       <group ref={body}>
         {/* Tall continuous kentongan body */}
         <mesh ref={bodyMesh} castShadow receiveShadow position={[0, 2.15, 0]}>
