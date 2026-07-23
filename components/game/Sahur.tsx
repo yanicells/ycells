@@ -368,17 +368,22 @@ function Face() {
       </mesh>
 
       {/* Heavy brow ridge spanning both sockets */}
-      <mesh position={[0, 0.36, 0.36]} scale={[1.75, 0.32, 0.7]}>
-        <sphereGeometry args={[0.24, 20, 14]} />
-        <meshStandardMaterial color={WOOD_MID} roughness={0.4} />
+      <mesh castShadow position={[0, 0.38, 0.38]} scale={[1.85, 0.38, 0.75]}>
+        <sphereGeometry args={[0.25, 20, 14]} />
+        <meshStandardMaterial color={WOOD_MID} roughness={0.38} />
       </mesh>
-      <mesh position={[-0.18, 0.34, 0.42]} scale={[0.7, 0.35, 0.55]}>
-        <sphereGeometry args={[0.12, 12, 10]} />
-        <meshStandardMaterial color={WOOD_DARK} roughness={0.45} />
+      <mesh castShadow position={[-0.2, 0.36, 0.45]} scale={[0.8, 0.4, 0.6]}>
+        <sphereGeometry args={[0.13, 12, 10]} />
+        <meshStandardMaterial color={WOOD_DARK} roughness={0.42} />
       </mesh>
-      <mesh position={[0.18, 0.34, 0.42]} scale={[0.7, 0.35, 0.55]}>
-        <sphereGeometry args={[0.12, 12, 10]} />
-        <meshStandardMaterial color={WOOD_DARK} roughness={0.45} />
+      <mesh castShadow position={[0.2, 0.36, 0.45]} scale={[0.8, 0.4, 0.6]}>
+        <sphereGeometry args={[0.13, 12, 10]} />
+        <meshStandardMaterial color={WOOD_DARK} roughness={0.42} />
+      </mesh>
+      {/* Glabella / frown between brows */}
+      <mesh position={[0, 0.3, 0.48]} scale={[0.55, 0.45, 0.5]}>
+        <sphereGeometry args={[0.08, 10, 8]} />
+        <meshStandardMaterial color={WOOD_DARK} roughness={0.48} />
       </mesh>
 
       <Eye position={[-0.2, 0.12, 0.4]} />
