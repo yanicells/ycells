@@ -195,6 +195,35 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
           <torusGeometry args={[0.64, 0.04, 10, 40]} />
           <meshStandardMaterial color={WOOD_DARK} roughness={0.45} metalness={0.05} />
         </mesh>
+        {/* Upper wrap band — reads from sides */}
+        <mesh castShadow position={[0, 3.35, 0]}>
+          <torusGeometry args={[0.6, 0.032, 10, 40]} />
+          <meshStandardMaterial color={WOOD_MID} roughness={0.4} metalness={0.06} />
+        </mesh>
+        {/* Lower wrap band */}
+        <mesh castShadow position={[0, 0.55, 0]}>
+          <torusGeometry args={[0.66, 0.035, 10, 40]} />
+          <meshStandardMaterial color={WOOD_DARK} roughness={0.48} metalness={0.05} />
+        </mesh>
+
+        {/* Kentongan back slit — silhouette from behind */}
+        <mesh castShadow position={[0, 2.15, -0.58]} rotation={[0, 0, 0]}>
+          <boxGeometry args={[0.12, 2.6, 0.14]} />
+          <meshStandardMaterial color={WOOD_DEEP} roughness={0.7} metalness={0.02} />
+        </mesh>
+        <mesh position={[0, 2.15, -0.62]}>
+          <boxGeometry args={[0.06, 2.45, 0.08]} />
+          <meshStandardMaterial color="#4a3424" roughness={0.85} />
+        </mesh>
+        {/* Side ridges so the cylinder reads in profile */}
+        <mesh castShadow position={[-0.62, 2.15, 0]} rotation={[0, 0, 0.04]}>
+          <cylinderGeometry args={[0.03, 0.03, 3.2, 8]} />
+          <meshStandardMaterial color={WOOD_MID} roughness={0.35} metalness={0.08} />
+        </mesh>
+        <mesh castShadow position={[0.62, 2.15, 0]} rotation={[0, 0, -0.04]}>
+          <cylinderGeometry args={[0.03, 0.03, 3.2, 8]} />
+          <meshStandardMaterial color={WOOD_MID} roughness={0.35} metalness={0.08} />
+        </mesh>
 
         <Face />
 
