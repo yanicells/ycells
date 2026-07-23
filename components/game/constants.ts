@@ -12,9 +12,9 @@ export const PLAYER_HEIGHT = 7.2;
 export const CAMERA_POS: [number, number, number] = [0, 18, 26];
 export const CAMERA_TARGET: [number, number, number] = [0, 2.2, 0];
 
-/** Soft-void palette shared by arena + shell. */
-export const VOID_BG = "#14161f";
-export const VOID_FOG = "#181a24";
-export const FLOOR = "#2a2d3a";
-export const FLOOR_LINE = "#4e4c60";
-export const RIM = "#e0c49c";
+/** Soft-void palette shared by arena + shell — charcoal-blue slate, readable floor. */
+export const VOID_BG = "#161822";
+export const VOID_FOG = "#1a1c28";
+export const FLOOR = "#303448";
+export const FLOOR_LINE = "#5a5870";
+export const RIM = "#e4c8a0";
