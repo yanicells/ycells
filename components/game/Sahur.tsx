@@ -249,13 +249,13 @@ function Face() {
       </mesh>
 
       {/* Heavy brow */}
-      <mesh position={[0, 0.26, 0.28]} scale={[1.35, 0.32, 0.6]}>
+      <mesh position={[0, 0.38, 0.3]} scale={[1.55, 0.28, 0.55]}>
         <sphereGeometry args={[0.24, 18, 12]} />
         <meshStandardMaterial color={WOOD_MID} roughness={0.42} />
       </mesh>
 
-      <Eye position={[-0.18, 0.06, 0.36]} />
-      <Eye position={[0.18, 0.06, 0.36]} />
+      <Eye position={[-0.22, 0.1, 0.38]} />
+      <Eye position={[0.22, 0.1, 0.38]} />
 
       {/* Human nose — strong bridge + tip */}
       <group position={[0, -0.06, 0.42]} rotation={[0.2, 0, 0]}>
@@ -303,24 +303,30 @@ function Face() {
 function Eye({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      <mesh castShadow scale={[1.1, 1.25, 1.15]}>
-        <sphereGeometry args={[0.155, 24, 24]} />
+      {/* Huge bulging sclera — meme-scale stare */}
+      <mesh castShadow scale={[1.15, 1.35, 1.25]}>
+        <sphereGeometry args={[0.22, 28, 28]} />
         <meshStandardMaterial
           color={EYE_WHITE}
-          roughness={0.1}
+          roughness={0.08}
           metalness={0.02}
         />
       </mesh>
-      <mesh position={[0.02, -0.02, 0.13]}>
-        <sphereGeometry args={[0.062, 16, 16]} />
-        <meshStandardMaterial color={PUPIL} roughness={0.3} />
+      {/* Dark iris ring under pupil for depth */}
+      <mesh position={[0.015, -0.015, 0.175]} scale={[1, 1.05, 0.55]}>
+        <sphereGeometry args={[0.095, 16, 16]} />
+        <meshStandardMaterial color="#2a221c" roughness={0.45} />
       </mesh>
-      <mesh position={[-0.05, 0.05, 0.145]}>
-        <sphereGeometry args={[0.028, 8, 8]} />
+      <mesh position={[0.02, -0.02, 0.2]}>
+        <sphereGeometry args={[0.078, 16, 16]} />
+        <meshStandardMaterial color={PUPIL} roughness={0.25} />
+      </mesh>
+      <mesh position={[-0.06, 0.06, 0.22]}>
+        <sphereGeometry args={[0.036, 8, 8]} />
         <meshBasicMaterial color="#ffffff" />
       </mesh>
-      <mesh position={[0.05, 0.015, 0.15]} scale={0.5}>
-        <sphereGeometry args={[0.02, 8, 8]} />
+      <mesh position={[0.055, 0.01, 0.23]} scale={0.55}>
+        <sphereGeometry args={[0.024, 8, 8]} />
         <meshBasicMaterial color="#ffffff" />
       </mesh>
     </group>
