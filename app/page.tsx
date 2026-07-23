@@ -48,6 +48,46 @@ export default function Home() {
         >
           he has a bat. you have WASD. good luck.
         </p>
+        <p
+          style={{
+            margin: "0.15rem 0 0",
+            textAlign: "center",
+            fontSize: "clamp(0.62rem, 1.4vw, 0.72rem)",
+            color: "var(--ash-muted)",
+            opacity: 0.75,
+            letterSpacing: "0.01em",
+            maxWidth: "42rem",
+          }}
+        >
+          Model:{" "}
+          <a
+            href="https://sketchfab.com/3d-models/tung-tung-tung-sahur-91ddd9079bd84019ba4a12e01d93a0d6"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "var(--bone-dim)", textDecoration: "underline" }}
+          >
+            Tung Tung Tung Sahur
+          </a>{" "}
+          by{" "}
+          <a
+            href="https://sketchfab.com/Eks.Art"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "var(--bone-dim)", textDecoration: "underline" }}
+          >
+            Eks.Art
+          </a>
+          ,{" "}
+          <a
+            href="https://creativecommons.org/licenses/by/4.0/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "var(--bone-dim)", textDecoration: "underline" }}
+          >
+            CC BY 4.0
+          </a>
+          {" "}· adapted for this game
+        </p>
       </header>
       <div
         id="game-mount"
