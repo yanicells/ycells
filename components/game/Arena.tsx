@@ -12,43 +12,43 @@ import {
 
 export default function Arena() {
   const size = ARENA_SIZE * 2;
-  const gridStep = 3;
+  const gridStep = 4;
 
   return (
     <group>
       <color attach="background" args={[VOID_BG]} />
-      <fog attach="fog" args={[VOID_FOG, 36, 72]} />
+      <fog attach="fog" args={[VOID_FOG, 48, 100]} />
 
-      <ambientLight intensity={0.62} color="#d8d0c4" />
+      <ambientLight intensity={0.68} color="#ddd5c8" />
       <hemisphereLight
-        intensity={0.75}
-        color="#fff4e8"
-        groundColor="#2a2835"
+        intensity={0.82}
+        color="#fff6ea"
+        groundColor="#2e3040"
       />
       <directionalLight
         castShadow
-        position={[8, 16, 7]}
-        intensity={2.6}
+        position={[12, 22, 10]}
+        intensity={2.75}
         color="#fff8f0"
         shadow-mapSize={[2048, 2048]}
         shadow-camera-near={1}
-        shadow-camera-far={70}
-        shadow-camera-left={-28}
-        shadow-camera-right={28}
-        shadow-camera-top={28}
-        shadow-camera-bottom={-28}
+        shadow-camera-far={110}
+        shadow-camera-left={-44}
+        shadow-camera-right={44}
+        shadow-camera-top={44}
+        shadow-camera-bottom={-44}
         shadow-bias={-0.0002}
       />
       <directionalLight
-        position={[-10, 7, -6]}
-        intensity={0.95}
+        position={[-14, 10, -8]}
+        intensity={1.05}
         color="#a8bcff"
       />
       <pointLight
-        position={[0, 7, 2]}
-        intensity={0.85}
+        position={[0, 9, 3]}
+        intensity={0.95}
         color="#f0d2a8"
-        distance={36}
+        distance={52}
       />
 
       <mesh
