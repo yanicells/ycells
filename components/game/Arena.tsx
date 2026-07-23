@@ -17,19 +17,19 @@ export default function Arena() {
   return (
     <group>
       <color attach="background" args={[VOID_BG]} />
-      <fog attach="fog" args={[VOID_FOG, 48, 100]} />
+      <fog attach="fog" args={[VOID_FOG, 55, 110]} />
 
-      <ambientLight intensity={0.68} color="#ddd5c8" />
+      <ambientLight intensity={0.78} color="#e4dcd0" />
       <hemisphereLight
-        intensity={0.82}
-        color="#fff6ea"
-        groundColor="#2e3040"
+        intensity={0.9}
+        color="#fff8f0"
+        groundColor="#343648"
       />
       <directionalLight
         castShadow
-        position={[12, 22, 10]}
-        intensity={2.75}
-        color="#fff8f0"
+        position={[10, 18, 8]}
+        intensity={3.0}
+        color="#fffaf4"
         shadow-mapSize={[2048, 2048]}
         shadow-camera-near={1}
         shadow-camera-far={110}
