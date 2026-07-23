@@ -1,4 +1,3 @@
-wip - still deciding what to do here :))
-game? interactive stuff? troll?
+# ycells
 
-grrrrr
+blank slate. starting over.
