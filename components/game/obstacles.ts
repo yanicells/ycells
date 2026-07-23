@@ -1,108 +1,124 @@
-import { aabbOverlap } from "./math";
-import type { ObstacleKind } from "./draw";
+import { circleRectOverlapXZ } from "./math";
+import { ARENA_SIZE } from "./constants";
+
+export type ObstacleKind = "bat" | "cylinder" | "block";
 
 export type Obstacle = {
+  id: number;
   x: number;
-  y: number;
+  z: number;
   w: number;
+  d: number;
   h: number;
   vx: number;
-  vy: number;
+  vz: number;
   kind: ObstacleKind;
   age: number;
+  rot: number;
 };
 
 const KINDS: ObstacleKind[] = ["bat", "cylinder", "block"];
 
-export function spawnObstacle(arenaW: number, arenaH: number, difficulty: number): Obstacle {
+let nextId = 1;
+
+export function spawnObstacle(difficulty: number): Obstacle {
   const kind = KINDS[Math.floor(Math.random() * KINDS.length)];
   const edge = Math.floor(Math.random() * 4);
-  const speed = 70 + difficulty * 28 + Math.random() * 40;
-  const groundTop = arenaH * 0.48;
+  const speed = 2.4 + difficulty * 0.55 + Math.random() * 1.2;
+  const bound = ARENA_SIZE;
 
-  let w = 36;
-  let h = 28;
+  let w = 0.9;
+  let d = 0.55;
+  let h = 0.45;
   if (kind === "cylinder") {
-    w = 28 + Math.random() * 10;
-    h = 48 + Math.random() * 16;
+    w = 0.55 + Math.random() * 0.2;
+    d = w;
+    h = 1.1 + Math.random() * 0.4;
   } else if (kind === "block") {
-    w = 34 + Math.random() * 20;
-    h = 34 + Math.random() * 16;
+    w = 0.7 + Math.random() * 0.45;
+    d = 0.7 + Math.random() * 0.35;
+    h = 0.7 + Math.random() * 0.35;
   } else {
-    w = 44 + Math.random() * 16;
-    h = 22 + Math.random() * 10;
+    w = 1.1 + Math.random() * 0.35;
+    d = 0.35 + Math.random() * 0.15;
+    h = 0.28 + Math.random() * 0.12;
   }
 
   let x = 0;
-  let y = 0;
+  let z = 0;
   let vx = 0;
-  let vy = 0;
-  const targetX = arenaW * (0.25 + Math.random() * 0.5);
-  const targetY = groundTop + Math.random() * (arenaH - groundTop - 40);
+  let vz = 0;
+  const targetX = (Math.random() - 0.5) * bound;
+  const targetZ = (Math.random() - 0.5) * bound;
 
   if (edge === 0) {
-    // left
-    x = -w - 8;
-    y = groundTop + Math.random() * (arenaH - groundTop - h - 20);
+    x = -bound - 1.2;
+    z = (Math.random() - 0.5) * bound * 1.6;
     vx = speed;
-    vy = (targetY - y) * 0.15;
+    vz = (targetZ - z) * 0.35;
   } else if (edge === 1) {
-    // right
-    x = arenaW + 8;
-    y = groundTop + Math.random() * (arenaH - groundTop - h - 20);
+    x = bound + 1.2;
+    z = (Math.random() - 0.5) * bound * 1.6;
     vx = -speed;
-    vy = (targetY - y) * 0.15;
+    vz = (targetZ - z) * 0.35;
   } else if (edge === 2) {
-    // top-ish mid
-    x = Math.random() * (arenaW - w);
-    y = groundTop - h - 10;
-    vx = (targetX - x) * 0.12;
-    vy = speed * 0.85;
+    x = (Math.random() - 0.5) * bound * 1.6;
+    z = -bound - 1.2;
+    vx = (targetX - x) * 0.3;
+    vz = speed * 0.9;
   } else {
-    // bottom
-    x = Math.random() * (arenaW - w);
-    y = arenaH + 8;
-    vx = (targetX - x) * 0.12;
-    vy = -speed * 0.7;
+    x = (Math.random() - 0.5) * bound * 1.6;
+    z = bound + 1.2;
+    vx = (targetX - x) * 0.3;
+    vz = -speed * 0.75;
   }
 
-  return { x, y, w, h, vx, vy, kind, age: 0 };
+  return {
+    id: nextId++,
+    x,
+    z,
+    w,
+    d,
+    h,
+    vx,
+    vz,
+    kind,
+    age: 0,
+    rot: Math.random() * Math.PI * 2,
+  };
 }
 
 export function updateObstacles(
   obstacles: Obstacle[],
   dt: number,
-  arenaW: number,
-  arenaH: number,
 ): Obstacle[] {
+  const limit = ARENA_SIZE + 4;
   return obstacles
     .map((o) => ({
       ...o,
       x: o.x + o.vx * dt,
-      y: o.y + o.vy * dt,
+      z: o.z + o.vz * dt,
       age: o.age + dt,
+      rot: o.rot + dt * (o.kind === "bat" ? 2.2 : 0.6),
     }))
     .filter(
       (o) =>
-        o.x > -120 &&
-        o.x < arenaW + 120 &&
-        o.y > -120 &&
-        o.y < arenaH + 120 &&
-        o.age < 12,
+        o.x > -limit &&
+        o.x < limit &&
+        o.z > -limit &&
+        o.z < limit &&
+        o.age < 14,
     );
 }
 
 export function hitsPlayer(
   obstacles: Obstacle[],
   px: number,
-  py: number,
-  pw: number,
-  ph: number,
+  pz: number,
+  radius: number,
 ): boolean {
-  const ax = px - pw / 2;
-  const ay = py - ph;
   for (const o of obstacles) {
-    if (aabbOverlap(ax, ay, pw, ph, o.x, o.y, o.w, o.h)) return true;
+    if (circleRectOverlapXZ(px, pz, radius, o.x, o.z, o.w, o.d)) return true;
   }
   return false;
 }
