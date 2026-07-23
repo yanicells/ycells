@@ -324,45 +324,57 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
 
 function Face() {
   return (
-    <group position={[0, 3.35, 0.62]}>
-      {/* Subtle facial plane carved into the cylinder front */}
-      <mesh castShadow position={[0, -0.05, 0.06]} scale={[1.15, 1.2, 0.7]}>
+    <group position={[0, 3.4, 0.48]}>
+      {/* Soft facial mound — flush with cylinder, slight forward carve */}
+      <mesh castShadow position={[0, -0.02, 0.08]} scale={[1.2, 1.35, 0.85]}>
         <sphereGeometry
-          args={[0.46, 32, 24, 0, Math.PI * 2, 0, Math.PI * 0.7]}
+          args={[0.5, 36, 28, 0, Math.PI * 2, 0, Math.PI * 0.72]}
         />
-        <meshStandardMaterial color="#e4c8a4" roughness={0.3} metalness={0.03} />
+        <meshStandardMaterial color="#ddc09a" roughness={0.32} metalness={0.03} />
       </mesh>
 
-      {/* Heavy brow */}
-      <mesh position={[0, 0.42, 0.34]} scale={[1.65, 0.3, 0.55]}>
-        <sphereGeometry args={[0.26, 18, 12]} />
+      {/* Recessed eye sockets — darker inset so sclera sits inside wood */}
+      <mesh position={[-0.2, 0.14, 0.28]} scale={[1.15, 1.05, 0.7]}>
+        <sphereGeometry args={[0.2, 20, 16]} />
+        <meshStandardMaterial color="#8a6848" roughness={0.7} />
+      </mesh>
+      <mesh position={[0.2, 0.14, 0.28]} scale={[1.15, 1.05, 0.7]}>
+        <sphereGeometry args={[0.2, 20, 16]} />
+        <meshStandardMaterial color="#8a6848" roughness={0.7} />
+      </mesh>
+      <mesh position={[-0.2, 0.14, 0.32]} scale={[0.95, 0.85, 0.45]}>
+        <sphereGeometry args={[0.16, 16, 12]} />
+        <meshStandardMaterial color="#6a4e38" roughness={0.78} />
+      </mesh>
+      <mesh position={[0.2, 0.14, 0.32]} scale={[0.95, 0.85, 0.45]}>
+        <sphereGeometry args={[0.16, 16, 12]} />
+        <meshStandardMaterial color="#6a4e38" roughness={0.78} />
+      </mesh>
+
+      {/* Heavy brow ridge spanning both sockets */}
+      <mesh position={[0, 0.36, 0.36]} scale={[1.75, 0.32, 0.7]}>
+        <sphereGeometry args={[0.24, 20, 14]} />
         <meshStandardMaterial color={WOOD_MID} roughness={0.4} />
       </mesh>
+      <mesh position={[-0.18, 0.34, 0.42]} scale={[0.7, 0.35, 0.55]}>
+        <sphereGeometry args={[0.12, 12, 10]} />
+        <meshStandardMaterial color={WOOD_DARK} roughness={0.45} />
+      </mesh>
+      <mesh position={[0.18, 0.34, 0.42]} scale={[0.7, 0.35, 0.55]}>
+        <sphereGeometry args={[0.12, 12, 10]} />
+        <meshStandardMaterial color={WOOD_DARK} roughness={0.45} />
+      </mesh>
 
-      <Eye position={[-0.24, 0.1, 0.4]} />
-      <Eye position={[0.24, 0.1, 0.4]} />
+      <Eye position={[-0.2, 0.12, 0.4]} />
+      <Eye position={[0.2, 0.12, 0.4]} />
 
-      {/* Human nose — strong bridge + tip, pushed forward to read on camera */}
+      {/* Placeholder nose/mouth/cheeks — refined in following commits */}
       <group position={[0, -0.08, 0.52]} rotation={[0.35, 0, 0]}>
         <mesh castShadow position={[0, 0.08, 0]} scale={[1, 1.2, 1.25]}>
           <capsuleGeometry args={[0.08, 0.22, 4, 12]} />
           <meshStandardMaterial color={NOSE} roughness={0.36} />
         </mesh>
-        <mesh castShadow position={[0, -0.12, 0.08]} scale={[1.45, 0.8, 1.15]}>
-          <sphereGeometry args={[0.095, 14, 12]} />
-          <meshStandardMaterial color="#c49872" roughness={0.38} />
-        </mesh>
-        <mesh position={[-0.06, -0.16, 0.06]} scale={[0.75, 0.55, 0.65]}>
-          <sphereGeometry args={[0.05, 8, 8]} />
-          <meshStandardMaterial color={FLESH_SHADOW} roughness={0.5} />
-        </mesh>
-        <mesh position={[0.06, -0.16, 0.06]} scale={[0.75, 0.55, 0.65]}>
-          <sphereGeometry args={[0.05, 8, 8]} />
-          <meshStandardMaterial color={FLESH_SHADOW} roughness={0.5} />
-        </mesh>
       </group>
-
-      {/* Closed smirk — thicker lips, pushed out */}
       <mesh
         position={[0.08, -0.4, 0.48]}
         rotation={[1.05, 0.1, -0.55]}
@@ -371,16 +383,6 @@ function Face() {
         <torusGeometry args={[0.14, 0.028, 8, 28, Math.PI * 0.95]} />
         <meshStandardMaterial color={LIP} roughness={0.48} />
       </mesh>
-      <mesh
-        position={[0.05, -0.38, 0.5]}
-        rotation={[1.05, 0.08, -0.5]}
-        scale={[1.25, 0.45, 0.8]}
-      >
-        <torusGeometry args={[0.11, 0.014, 6, 20, Math.PI * 0.8]} />
-        <meshStandardMaterial color="#8a5a48" roughness={0.52} />
-      </mesh>
-
-      {/* Cheeks */}
       <mesh position={[0.34, -0.16, 0.28]} scale={[1.15, 0.9, 0.75]}>
         <sphereGeometry args={[0.12, 12, 12]} />
         <meshStandardMaterial color="#d4ac88" roughness={0.46} />
