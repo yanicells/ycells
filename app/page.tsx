@@ -1,3 +1,5 @@
+import SahurGameLoader from "@/components/game/SahurGameLoader";
+
 export default function Home() {
   return (
     <main
@@ -43,10 +45,14 @@ export default function Home() {
         style={{
           width: "min(960px, 100%)",
           flex: 1,
-          minHeight: "min(62dvh, 560px)",
+          minHeight: "min(58dvh, 520px)",
           marginTop: "0.5rem",
+          display: "flex",
+          flexDirection: "column",
         }}
-      />
+      >
+        <SahurGameLoader />
+      </div>
     </main>
   );
 }

@@ -71,12 +71,15 @@ export default function MobileControls({ onDir, onRestart, dead }: Props) {
         <button type="button" style={btn} {...bind("x", -1)} aria-label="Left">
           ◀
         </button>
-        <button type="button" style={btn} {...bind("y", 1)} aria-label="Down">
-          ▼
-        </button>
+        <span />
         <button type="button" style={btn} {...bind("x", 1)} aria-label="Right">
           ▶
         </button>
+        <span />
+        <button type="button" style={btn} {...bind("y", 1)} aria-label="Down">
+          ▼
+        </button>
+        <span />
       </div>
 
       {dead ? (
