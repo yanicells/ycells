@@ -368,11 +368,36 @@ function Face() {
       <Eye position={[-0.2, 0.12, 0.4]} />
       <Eye position={[0.2, 0.12, 0.4]} />
 
-      {/* Placeholder nose/mouth/cheeks — refined in following commits */}
-      <group position={[0, -0.08, 0.52]} rotation={[0.35, 0, 0]}>
-        <mesh castShadow position={[0, 0.08, 0]} scale={[1, 1.2, 1.25]}>
-          <capsuleGeometry args={[0.08, 0.22, 4, 12]} />
+      {/* Human nose — bridge, bulb tip, nostrils protruding from wood */}
+      <group position={[0, -0.02, 0.48]} rotation={[0.28, 0, 0]}>
+        <mesh castShadow position={[0, 0.12, 0.02]} scale={[0.9, 1.15, 1.1]}>
+          <capsuleGeometry args={[0.07, 0.2, 4, 14]} />
           <meshStandardMaterial color={NOSE} roughness={0.36} />
+        </mesh>
+        <mesh castShadow position={[0, -0.02, 0.1]} scale={[1.35, 0.95, 1.25]}>
+          <sphereGeometry args={[0.1, 16, 14]} />
+          <meshStandardMaterial color="#c49872" roughness={0.38} />
+        </mesh>
+        <mesh castShadow position={[0, -0.08, 0.14]} scale={[1.1, 0.7, 0.9]}>
+          <sphereGeometry args={[0.07, 12, 12]} />
+          <meshStandardMaterial color="#b88860" roughness={0.42} />
+        </mesh>
+        <mesh position={[-0.055, -0.1, 0.12]} scale={[0.7, 0.55, 0.7]} rotation={[0.3, 0.4, 0]}>
+          <sphereGeometry args={[0.045, 8, 8]} />
+          <meshStandardMaterial color={FLESH_SHADOW} roughness={0.55} />
+        </mesh>
+        <mesh position={[0.055, -0.1, 0.12]} scale={[0.7, 0.55, 0.7]} rotation={[0.3, -0.4, 0]}>
+          <sphereGeometry args={[0.045, 8, 8]} />
+          <meshStandardMaterial color={FLESH_SHADOW} roughness={0.55} />
+        </mesh>
+        {/* Nostril holes */}
+        <mesh position={[-0.04, -0.11, 0.155]} scale={[0.55, 0.4, 0.35]}>
+          <sphereGeometry args={[0.03, 8, 8]} />
+          <meshStandardMaterial color="#4a3020" roughness={0.9} />
+        </mesh>
+        <mesh position={[0.04, -0.11, 0.155]} scale={[0.55, 0.4, 0.35]}>
+          <sphereGeometry args={[0.03, 8, 8]} />
+          <meshStandardMaterial color="#4a3020" roughness={0.9} />
         </mesh>
       </group>
       <mesh
