@@ -117,7 +117,7 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
       root.current.position.set(a.x, 1.48, a.z);
       root.current.rotation.y = a.yaw;
       const punch = a.hitFlash > 0 ? 1 + a.hitFlash * 0.07 : 1;
-      root.current.scale.setScalar(punch);
+      root.current.scale.setScalar(1.85 * punch);
     }
 
     const bob =
@@ -133,11 +133,11 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
         Math.sin(phase.current * 0.5) * 0.025 * motion * (moving ? 1 : 0.35);
     }
 
-    const swing = Math.sin(phase.current) * (moving ? 0.5 : 0.05) * motion;
+    const swing = Math.sin(phase.current) * (moving ? 0.55 : 0.06) * motion;
     if (leftLeg.current) leftLeg.current.rotation.x = swing;
     if (rightLeg.current) rightLeg.current.rotation.x = -swing;
-    if (leftArm.current) leftArm.current.rotation.x = -swing * 0.65;
-    if (rightArm.current) rightArm.current.rotation.x = swing * 0.5 - 0.2;
+    if (leftArm.current) leftArm.current.rotation.x = -swing * 0.7;
+    if (rightArm.current) rightArm.current.rotation.x = swing * 0.45 - 0.25;
     if (bat.current) {
       bat.current.rotation.z =
         0.72 + Math.sin(phase.current * 0.8) * 0.06 * motion;
