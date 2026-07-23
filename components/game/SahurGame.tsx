@@ -1,20 +1,43 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Canvas } from "@react-three/fiber";
 import { PerspectiveCamera } from "@react-three/drei";
 import Arena from "./Arena";
-import Sahur from "./Sahur";
-import { CAMERA_POS, CAMERA_TARGET } from "./constants";
-
-function LookAt({ target }: { target: [number, number, number] }) {
-  const camera = useThree((s) => s.camera);
-  useFrame(() => {
-    camera.lookAt(target[0], target[1], target[2]);
-  });
-  return null;
-}
+import GameWorld, { type GameHudState, type Phase } from "./GameWorld";
+import MobileControls from "./MobileControls";
+import { CAMERA_POS } from "./constants";
 
 export default function SahurGame() {
+  const virtualRef = useRef({ x: 0, y: 0 });
+  const restartRef = useRef<() => void>(() => {});
+  const [phaseUi, setPhaseUi] = useState<Phase>("start");
+  const [, setHud] = useState<GameHudState>({
+    phase: "start",
+    score: 0,
+    highScore: 0,
+  });
+
+  const reducedMotion = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    [],
+  );
+
+  const onHud = useCallback((state: GameHudState) => {
+    setHud(state);
+    setPhaseUi(state.phase);
+  }, []);
+
+  const onDir = useCallback((axis: "x" | "y", value: number) => {
+    virtualRef.current[axis] = value;
+  }, []);
+
+  const onRestart = useCallback(() => {
+    restartRef.current();
+  }, []);
+
   return (
     <div
       style={{
@@ -31,6 +54,7 @@ export default function SahurGame() {
           border: "1px solid rgba(196, 168, 130, 0.18)",
           background: "#050506",
           overflow: "hidden",
+          position: "relative",
         }}
       >
         <Canvas
@@ -38,7 +62,6 @@ export default function SahurGame() {
           dpr={[1, 2]}
           gl={{ antialias: true, alpha: false }}
           style={{ width: "100%", height: "100%", outline: "none" }}
-          tabIndex={0}
           role="img"
           aria-label="Tung Tung Tung Sahur 3D arena. Use WASD or arrow keys to move. Space to start or restart. On mobile use the on-screen D-pad."
         >
@@ -49,11 +72,20 @@ export default function SahurGame() {
             near={0.1}
             far={80}
           />
-          <LookAt target={CAMERA_TARGET} />
           <Arena />
-          <Sahur position={[0, 0, 2.2]} yaw={0} moveAmount={0} />
+          <GameWorld
+            virtualRef={virtualRef}
+            onHud={onHud}
+            restartRef={restartRef}
+            reducedMotion={reducedMotion}
+          />
         </Canvas>
       </div>
+      <MobileControls
+        onDir={onDir}
+        onRestart={onRestart}
+        dead={phaseUi === "dead"}
+      />
     </div>
   );
 }
