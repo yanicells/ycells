@@ -114,7 +114,7 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
 
     if (root.current) {
       // Feet rest on the floor (oversized soles) — scaled body sits higher
-      root.current.position.set(a.x, 0.8, a.z);
+      root.current.position.set(a.x, 1.48, a.z);
       root.current.rotation.y = a.yaw;
       const punch = a.hitFlash > 0 ? 1 + a.hitFlash * 0.07 : 1;
       root.current.scale.setScalar(punch);
