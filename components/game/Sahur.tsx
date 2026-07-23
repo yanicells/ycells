@@ -264,20 +264,20 @@ function applyLimbSwing(
       ox = x + side * (0.16 + swingGate * latAmp) * amp * w;
     }
 
-    // Arms + bat — counter-phase shoulder pivot (opposite of legs).
+    // Arms + bat — counter-phase shoulder pivot with front-cam lateral read.
     const inArmBand = z > ARM_MIN_Z && z < ARM_MAX_Z && radial > TORSO_RADIUS;
     if (inArmBand || isBat) {
       const band = inArmBand
-        ? THREE.MathUtils.smoothstep(z, ARM_MIN_Z, ARM_MIN_Z + 0.3)
-        : THREE.MathUtils.smoothstep(radial, BAT_RADIUS, BAT_RADIUS + 0.35);
+        ? THREE.MathUtils.smoothstep(z, ARM_MIN_Z, ARM_MIN_Z + 0.28)
+        : THREE.MathUtils.smoothstep(radial, BAT_RADIUS, BAT_RADIUS + 0.3);
       const top =
-        1 - THREE.MathUtils.smoothstep(z, ARM_MAX_Z - 0.3, ARM_MAX_Z);
+        1 - THREE.MathUtils.smoothstep(z, ARM_MAX_Z - 0.28, ARM_MAX_Z);
       const out = THREE.MathUtils.smoothstep(
         radial,
         TORSO_RADIUS,
-        TORSO_RADIUS + 0.28,
+        TORSO_RADIUS + 0.22,
       );
-      const w = Math.min(1, band * top * out * (isBat ? 1.15 : 1));
+      const w = Math.min(1, band * top * out * (isBat ? 1.25 : 1));
       // Counter to legs: when that leg goes forward (-Y), this arm swings back (+Y).
       const theta = sinP * side * armAng * w;
       const c = Math.cos(theta);
@@ -286,10 +286,20 @@ function applyLimbSwing(
       const dz = z - SHOULDER_Z;
       oy = dy * c - dz * s;
       oz = SHOULDER_Z + dy * s + dz * c;
-      // Slight upward flick + outward on the forward arm for bat read.
+      // Forward arm lifts + flares out; back arm tucks — bat reads in silhouette.
       const forwardGate = Math.max(0, sinP * side);
-      oz += forwardGate * armLift * w;
-      ox = x + side * (0.12 + forwardGate * 0.18) * amp * w;
+      const backGate = Math.max(0, -sinP * side);
+      oz += (forwardGate * armLift - backGate * armLift * 0.35) * w;
+      ox =
+        x +
+        side *
+          (0.14 + forwardGate * armLat - backGate * armLat * 0.45) *
+          amp *
+          w;
+      // Extra bat tip travel along swing (outer verts).
+      if (isBat) {
+        oy -= sinP * side * 0.55 * amp * w;
+      }
     }
 
     arr[i] = ox;
