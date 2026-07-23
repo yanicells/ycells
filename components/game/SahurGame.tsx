@@ -51,8 +51,8 @@ export default function SahurGame() {
         style={{
           flex: 1,
           minHeight: 280,
-          border: "1px solid rgba(196, 168, 130, 0.18)",
-          background: "#050506",
+          border: "1px solid rgba(212, 184, 150, 0.22)",
+          background: "#0e0f14",
           overflow: "hidden",
           position: "relative",
         }}
@@ -68,9 +68,9 @@ export default function SahurGame() {
           <PerspectiveCamera
             makeDefault
             position={CAMERA_POS}
-            fov={42}
+            fov={38}
             near={0.1}
-            far={80}
+            far={120}
           />
           <Arena />
           <GameWorld
@@ -178,8 +178,8 @@ function Overlay({
         display: "grid",
         placeItems: "center",
         background: danger
-          ? "rgba(5, 5, 6, 0.55)"
-          : "rgba(5, 5, 6, 0.48)",
+          ? "rgba(14, 15, 20, 0.58)"
+          : "rgba(14, 15, 20, 0.42)",
         pointerEvents: "none",
         zIndex: 3,
         textAlign: "center",
