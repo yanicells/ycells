@@ -140,8 +140,8 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
     if (rightArm.current) rightArm.current.rotation.x = swing * 0.5 - 0.2;
     if (bat.current) {
       bat.current.rotation.z =
-        -0.25 + Math.sin(phase.current * 0.8) * 0.07 * motion;
-      bat.current.rotation.x = 0.2 + swing * 0.12;
+        0.72 + Math.sin(phase.current * 0.8) * 0.06 * motion;
+      bat.current.rotation.x = 1.05 + swing * 0.1;
     }
 
     if (bodyMesh.current) {
@@ -281,7 +281,7 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
           <group
             ref={bat}
             position={[0.52, -1.48, 0.22]}
-            rotation={[0.85, -0.2, 0.65]}
+            rotation={[1.05, -0.25, 0.72]}
           >
             <BatMesh />
           </group>
@@ -428,7 +428,7 @@ function Eye({ position }: { position: [number, number, number] }) {
 
 function Foot({ side }: { side: number }) {
   return (
-    <group position={[0, -0.94, 0.18]} rotation={[0.1, side * 0.22, 0]}>
+    <group position={[0, -1.08, 0.18]} rotation={[0.1, side * 0.22, 0]}>
       {/* Disproportionately huge fleshy sole */}
       <mesh castShadow position={[0, 0, 0.18]} scale={[1.45, 0.38, 2.15]}>
         <sphereGeometry args={[0.3, 18, 14]} />
