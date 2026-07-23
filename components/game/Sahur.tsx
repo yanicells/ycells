@@ -190,11 +190,11 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
         {/* Left arm — empty spindly stick */}
         <group ref={leftArm} position={[-0.68, 2.55, 0.05]}>
           <mesh castShadow rotation={[0.15, 0, 0.42]} position={[-0.08, -0.55, 0]}>
-            <cylinderGeometry args={[0.038, 0.048, 1.35, 8]} />
+            <cylinderGeometry args={[0.022, 0.03, 1.4, 8]} />
             <meshStandardMaterial color={WOOD_DARK} roughness={0.42} metalness={0.06} />
           </mesh>
-          <mesh castShadow position={[-0.38, -1.2, 0.08]}>
-            <sphereGeometry args={[0.095, 12, 12]} />
+          <mesh castShadow position={[-0.38, -1.22, 0.08]}>
+            <sphereGeometry args={[0.07, 12, 12]} />
             <meshStandardMaterial color={FLESH} roughness={0.62} />
           </mesh>
         </group>
@@ -202,11 +202,11 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
         {/* Right arm — holds the bat */}
         <group ref={rightArm} position={[0.68, 2.55, 0.05]}>
           <mesh castShadow rotation={[0.2, 0, -0.38]} position={[0.08, -0.55, 0]}>
-            <cylinderGeometry args={[0.038, 0.048, 1.35, 8]} />
+            <cylinderGeometry args={[0.022, 0.03, 1.4, 8]} />
             <meshStandardMaterial color={WOOD_DARK} roughness={0.42} metalness={0.06} />
           </mesh>
-          <mesh castShadow position={[0.36, -1.2, 0.1]}>
-            <sphereGeometry args={[0.095, 12, 12]} />
+          <mesh castShadow position={[0.36, -1.22, 0.1]}>
+            <sphereGeometry args={[0.07, 12, 12]} />
             <meshStandardMaterial color={FLESH} roughness={0.62} />
           </mesh>
           <group
@@ -220,14 +220,14 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
 
         <group ref={leftLeg} position={[-0.22, 0.38, 0]}>
           <mesh castShadow position={[0, -0.42, 0]}>
-            <cylinderGeometry args={[0.042, 0.05, 1.05, 8]} />
+            <cylinderGeometry args={[0.024, 0.032, 1.05, 8]} />
             <meshStandardMaterial color={WOOD_DEEP} roughness={0.48} />
           </mesh>
           <Foot side={-1} />
         </group>
         <group ref={rightLeg} position={[0.22, 0.38, 0]}>
           <mesh castShadow position={[0, -0.42, 0]}>
-            <cylinderGeometry args={[0.042, 0.05, 1.05, 8]} />
+            <cylinderGeometry args={[0.024, 0.032, 1.05, 8]} />
             <meshStandardMaterial color={WOOD_DEEP} roughness={0.48} />
           </mesh>
           <Foot side={1} />
