@@ -2,16 +2,37 @@
 
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
-const WOOD = "#c4a882";
-const WOOD_DARK = "#8a6f52";
-const WOOD_DEEP = "#6b5340";
-const FLESH = "#d4a574";
-const FLESH_SHADOW = "#b88962";
-const EYE_WHITE = "#f5f2ea";
-const PUPIL = "#1a1210";
-const LIP = "#5c4034";
+/** Target standing height in world units (feet on floor → top of body). */
+const TARGET_HEIGHT = 7.2;
+const MODEL_URL = "/models/sahur.glb";
+
+/**
+ * Mesh-local Z is height on this Sketchfab export (feet≈0, head≈5.85).
+ * Limb swing is a fake walk cycle — the GLB has no skeleton/animations.
+ * Face ≈ -Y; stride rotates limbs in the YZ plane (around local X).
+ */
+const LEG_MAX_Z = 1.55;
+const HIP_Z = 1.42;
+const LEG_CORE_RADIUS = 0.16;
+const ARM_MIN_Z = 1.75;
+const ARM_MAX_Z = 4.05;
+const SHOULDER_Z = 3.35;
+const TORSO_RADIUS = 0.68;
+/** Bat / stick can hang below the arm band — catch by outer radius. */
+const BAT_RADIUS = 0.92;
+/**
+ * Amps tuned for the elevated FRONT follow cam (depth foreshortens Y-stride).
+ * Prefer lift (Z) + lateral (X) so opposite legs read in silhouette.
+ */
+const LEG_STRIDE_RAD = 0.95;
+const LEG_LIFT = 1.05;
+const LEG_LATERAL = 0.42;
+const ARM_STRIDE_RAD = 1.15;
+const ARM_LIFT = 0.55;
+const ARM_LATERAL = 0.48;
 
 export type SahurAnimState = {
   x: number;
@@ -26,101 +47,145 @@ type SahurProps = {
   reducedMotion?: boolean;
 };
 
-function woodMat(color = WOOD, gloss = 0.28) {
-  return (
-    <meshStandardMaterial
-      color={color}
-      roughness={gloss}
-      metalness={0.08}
-      envMapIntensity={0.6}
-    />
-  );
-}
+type LimbRig = {
+  bind: Float32Array;
+  position: THREE.BufferAttribute;
+  geometry: THREE.BufferGeometry;
+};
 
-function makeWoodGrainTexture(): THREE.CanvasTexture | null {
-  if (typeof document === "undefined") return null;
-  const canvas = document.createElement("canvas");
-  canvas.width = 64;
-  canvas.height = 256;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return null;
-  const g = ctx.createLinearGradient(0, 0, 64, 0);
-  g.addColorStop(0, "#b8956e");
-  g.addColorStop(0.35, "#c9ad88");
-  g.addColorStop(0.55, "#d4b896");
-  g.addColorStop(0.8, "#b8956e");
-  g.addColorStop(1, "#a07d5c");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 64, 256);
-  for (let i = 0; i < 18; i++) {
-    const x = Math.random() * 64;
-    ctx.strokeStyle = `rgba(90, 70, 48, ${0.08 + Math.random() * 0.12})`;
-    ctx.lineWidth = 0.6 + Math.random();
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x + (Math.random() - 0.5) * 4, 256);
-    ctx.stroke();
-  }
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.wrapS = THREE.RepeatWrapping;
-  tex.wrapT = THREE.ClampToEdgeWrapping;
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
-}
-
-/** Procedural Tung Tung Tung Sahur — cursed cylinder with stick limbs + bat. */
+/**
+ * Sketchfab GLB Sahur (Eks.Art, CC BY 4.0) — grounded, scaled, with a
+ * procedural limb walk cycle (vertex deformation; asset is unrigged).
+ */
 export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
   const root = useRef<THREE.Group>(null);
-  const body = useRef<THREE.Group>(null);
-  const leftLeg = useRef<THREE.Group>(null);
-  const rightLeg = useRef<THREE.Group>(null);
-  const leftArm = useRef<THREE.Group>(null);
-  const rightArm = useRef<THREE.Group>(null);
-  const bat = useRef<THREE.Group>(null);
-  const bodyMesh = useRef<THREE.Mesh>(null);
+  const model = useRef<THREE.Group>(null);
   const phase = useRef(0);
-  const bodyMat = useMemo(() => makeWoodGrainTexture(), []);
+  const limbRig = useRef<LimbRig | null>(null);
+  const materials = useRef<THREE.MeshStandardMaterial[]>([]);
+  const { scene } = useGLTF(MODEL_URL);
+
+  const prepared = useMemo(() => {
+    const clone = scene.clone(true);
+    const matList: THREE.MeshStandardMaterial[] = [];
+    let rig: LimbRig | null = null;
+
+    clone.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+
+      // Fresh geometry so we can morph without touching the GLTF cache.
+      mesh.geometry = mesh.geometry.clone();
+      const geometry = mesh.geometry;
+      const position = geometry.attributes.position as THREE.BufferAttribute;
+      position.setUsage(THREE.DynamicDrawUsage);
+      geometry.computeBoundingSphere();
+      // Generous radius so swung limbs never frustum-cull mid-stride.
+      if (geometry.boundingSphere) {
+        geometry.boundingSphere.radius = Math.max(
+          geometry.boundingSphere.radius * 1.8,
+          6,
+        );
+      }
+      if (!rig) {
+        rig = {
+          bind: Float32Array.from(position.array as ArrayLike<number>),
+          position,
+          geometry,
+        };
+      }
+
+      const srcMats = Array.isArray(mesh.material)
+        ? mesh.material
+        : [mesh.material];
+      const clonedMats = srcMats.map((mat) => {
+        if (mat && "emissive" in mat) {
+          const std = (mat as THREE.MeshStandardMaterial).clone();
+          std.emissive = new THREE.Color(0x000000);
+          std.envMapIntensity = Math.max(std.envMapIntensity ?? 1, 0.85);
+          matList.push(std);
+          return std;
+        }
+        return mat;
+      });
+      mesh.material = Array.isArray(mesh.material)
+        ? (clonedMats as THREE.Material[])
+        : (clonedMats[0] as THREE.Material);
+    });
+
+    const box = new THREE.Box3().setFromObject(clone);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    clone.scale.setScalar(TARGET_HEIGHT / Math.max(size.y, 0.001));
+
+    const scaled = new THREE.Box3().setFromObject(clone);
+    clone.position.x = -(scaled.min.x + scaled.max.x) / 2;
+    clone.position.y = -scaled.min.y;
+    clone.position.z = -(scaled.min.z + scaled.max.z) / 2;
+
+    limbRig.current = rig;
+    materials.current = matList;
+    return clone;
+  }, [scene]);
 
   useFrame((_, dt) => {
     const a = anim.current;
-    const motion = reducedMotion ? 0.15 : 1;
+    const motion = reducedMotion ? 0.12 : 1;
     const moving = a.moveAmount > 0.08;
-    phase.current += dt * (moving ? 9 + a.moveAmount * 4 : 2.2) * motion;
+    // Walk cadence punches steps; idle keeps a slow fidget pulse.
+    const cadence = moving ? 12.5 + a.moveAmount * 5.5 : 3.0;
+    phase.current += dt * cadence * motion;
 
     if (root.current) {
-      // Lift so oversized feet sit on the arena floor
-      root.current.position.set(a.x, 0.36, a.z);
-      root.current.rotation.y = a.yaw;
-      const punch = a.hitFlash > 0 ? 1 + a.hitFlash * 0.08 : 1;
+      root.current.position.set(a.x, 0, a.z);
+      // GLB backs the camera at yaw=0; flip so the face reads front-on.
+      root.current.rotation.y = a.yaw + Math.PI;
+      const punch = a.hitFlash > 0 ? 1 + a.hitFlash * 0.07 : 1;
       root.current.scale.setScalar(punch);
     }
 
-    const bob =
-      Math.sin(phase.current * (moving ? 1 : 0.45)) *
-      (moving ? 0.06 : 0.035) *
-      motion;
-    const lean = moving ? a.moveAmount * 0.12 * motion : 0;
+    const swing =
+      Math.sin(phase.current) * (moving ? 1 : 0.32) * motion;
+    const swingAbs = Math.abs(swing);
+    const cosSwing = Math.cos(phase.current);
+    const stepPulse = Math.sin(phase.current * 2);
 
-    if (body.current) {
-      body.current.position.y = bob;
-      body.current.rotation.x = lean;
-      body.current.rotation.z =
-        Math.sin(phase.current * 0.5) * 0.03 * motion * (moving ? 1 : 0.4);
+    if (model.current) {
+      // Whole-body sells walking even when limb depth is foreshortened.
+      const bob = stepPulse * (moving ? 0.42 : 0.1) * motion;
+      const stepPop = swingAbs * (moving ? 0.18 : 0.04) * motion;
+      const lean = moving ? 0.12 + a.moveAmount * 0.38 * motion : 0.06 * motion;
+      const hipSway = swing * (moving ? 0.34 : 0.08) * motion;
+      const torsoTwist = swing * (moving ? 0.28 : 0.06) * motion;
+      const hipRoll = cosSwing * (moving ? 0.14 : 0.035) * motion;
+      // Idle weight-shift fidget (asymmetric so it doesn't look like a walk).
+      const fidget = !moving
+        ? Math.sin(phase.current * 0.65 + 0.7) * 0.06 * motion
+        : 0;
+      model.current.position.y = bob + stepPop;
+      model.current.position.x = hipSway * 0.55 + fidget;
+      // Slight vertical squash on each footfall.
+      const squash = moving ? 1 - Math.max(0, stepPulse) * 0.04 * motion : 1;
+      model.current.scale.set(1 / Math.sqrt(squash), squash, 1 / Math.sqrt(squash));
+      model.current.rotation.x = lean;
+      model.current.rotation.y = torsoTwist + fidget * 0.7;
+      model.current.rotation.z = hipSway + hipRoll * 0.65 + fidget * 0.9;
     }
 
-    const swing = Math.sin(phase.current) * (moving ? 0.55 : 0.06) * motion;
-    if (leftLeg.current) leftLeg.current.rotation.x = swing;
-    if (rightLeg.current) rightLeg.current.rotation.x = -swing;
-    if (leftArm.current) leftArm.current.rotation.x = -swing * 0.7;
-    if (rightArm.current) rightArm.current.rotation.x = swing * 0.55 - 0.25;
-    if (bat.current) {
-      bat.current.rotation.z =
-        -0.35 + Math.sin(phase.current * 0.85) * 0.08 * motion;
-      bat.current.rotation.x = 0.15 + swing * 0.15;
+    const rig = limbRig.current;
+    if (rig) {
+      const amount = reducedMotion
+        ? 0.18
+        : moving
+          ? Math.max(1.25, 0.85 + a.moveAmount * 0.95)
+          : 0.58;
+      applyLimbSwing(rig, phase.current, amount, moving);
     }
 
-    if (bodyMesh.current) {
-      const mat = bodyMesh.current.material as THREE.MeshStandardMaterial;
+    for (const mat of materials.current) {
       if (a.hitFlash > 0) {
         mat.emissive.set("#ff8866");
         mat.emissiveIntensity = a.hitFlash * 0.85;
@@ -133,169 +198,145 @@ export default function Sahur({ anim, reducedMotion = false }: SahurProps) {
 
   return (
     <group ref={root}>
-      <group ref={body}>
-        <mesh ref={bodyMesh} castShadow position={[0, 1.35, 0]}>
-          <cylinderGeometry args={[0.42, 0.44, 2.15, 32]} />
-          <meshStandardMaterial
-            map={bodyMat}
-            color="#d2b48c"
-            roughness={0.28}
-            metalness={0.1}
-          />
-        </mesh>
-
-        <mesh castShadow position={[0, 2.42, 0]}>
-          <sphereGeometry args={[0.42, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          <meshStandardMaterial color={WOOD} roughness={0.25} metalness={0.1} />
-        </mesh>
-
-        <Face />
-
-        <group ref={leftArm} position={[-0.48, 1.55, 0]}>
-          <mesh castShadow rotation={[0, 0, 0.35]} position={[-0.05, -0.35, 0]}>
-            <cylinderGeometry args={[0.045, 0.05, 0.95, 8]} />
-            {woodMat(WOOD_DARK, 0.4)}
-          </mesh>
-          <mesh castShadow position={[-0.22, -0.82, 0.05]}>
-            <sphereGeometry args={[0.09, 10, 10]} />
-            <meshStandardMaterial color={FLESH} roughness={0.65} />
-          </mesh>
-          <group
-            ref={bat}
-            position={[-0.28, -0.95, 0.12]}
-            rotation={[0.2, 0.4, -0.55]}
-          >
-            <BatMesh />
-          </group>
-        </group>
-
-        <group ref={rightArm} position={[0.48, 1.55, 0]}>
-          <mesh castShadow rotation={[0, 0, -0.28]} position={[0.05, -0.35, 0]}>
-            <cylinderGeometry args={[0.045, 0.05, 0.95, 8]} />
-            {woodMat(WOOD_DARK, 0.4)}
-          </mesh>
-          <mesh castShadow position={[0.2, -0.82, 0.02]}>
-            <sphereGeometry args={[0.085, 10, 10]} />
-            <meshStandardMaterial color={FLESH} roughness={0.65} />
-          </mesh>
-        </group>
-
-        <group ref={leftLeg} position={[-0.16, 0.28, 0]}>
-          <mesh castShadow position={[0, -0.28, 0]}>
-            <cylinderGeometry args={[0.05, 0.055, 0.7, 8]} />
-            {woodMat(WOOD_DEEP, 0.45)}
-          </mesh>
-          <Foot side={-1} />
-        </group>
-        <group ref={rightLeg} position={[0.16, 0.28, 0]}>
-          <mesh castShadow position={[0, -0.28, 0]}>
-            <cylinderGeometry args={[0.05, 0.055, 0.7, 8]} />
-            {woodMat(WOOD_DEEP, 0.45)}
-          </mesh>
-          <Foot side={1} />
-        </group>
+      <group ref={model}>
+        <primitive object={prepared} />
       </group>
     </group>
   );
 }
 
-function Face() {
-  return (
-    <group position={[0, 1.85, 0.38]}>
-      <mesh castShadow position={[0, -0.05, 0.02]}>
-        <sphereGeometry args={[0.28, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.65]} />
-        <meshStandardMaterial color="#c9ae8c" roughness={0.35} metalness={0.05} />
-      </mesh>
+function applyLimbSwing(
+  rig: LimbRig,
+  phase: number,
+  moveAmount: number,
+  moving: boolean,
+) {
+  const { bind, position } = rig;
+  const arr = position.array as Float32Array;
+  // Guard against a disposed/replaced attribute after HMR or remount.
+  if (!arr || arr.length !== bind.length) return;
+  const amp = THREE.MathUtils.clamp(moveAmount, 0, 2.2);
 
-      <Eye position={[-0.12, 0.08, 0.18]} />
-      <Eye position={[0.12, 0.08, 0.18]} />
+  // Idle: softer legs, livelier arms so fidget reads without fake-walking.
+  const legScale = moving ? 1 : 0.55;
+  const armScale = moving ? 1 : 0.85;
+  const legAng = LEG_STRIDE_RAD * amp * legScale;
+  const liftAmp = LEG_LIFT * amp * (moving ? 1 : 0.3);
+  const latAmp = LEG_LATERAL * amp * (moving ? 1 : 0.4);
+  const armAng = ARM_STRIDE_RAD * amp * armScale;
+  const armLift = ARM_LIFT * amp * (moving ? 1 : 0.4);
+  const armLat = ARM_LATERAL * amp * (moving ? 1 : 0.5);
+  const sinP = Math.sin(phase);
+  const cosP = Math.cos(phase);
+  // Secondary harmonic = knee crease on the swinging leg.
+  const kneeKick = moving ? Math.max(0, Math.sin(phase * 2)) * 0.28 * amp : 0;
 
-      <mesh castShadow position={[0, -0.02, 0.26]} rotation={[0.35, 0, 0]}>
-        <capsuleGeometry args={[0.045, 0.1, 4, 8]} />
-        <meshStandardMaterial color="#b8956e" roughness={0.4} />
-      </mesh>
+  for (let i = 0; i < bind.length; i += 3) {
+    const x = bind[i];
+    const y = bind[i + 1];
+    const z = bind[i + 2];
+    const side = x >= -0.05 ? 1 : -1;
+    const radial = Math.hypot(x, y);
 
-      <mesh
-        position={[0.02, -0.16, 0.24]}
-        rotation={[1.35, 0, -0.35]}
-        scale={[1.05, 0.7, 1]}
-      >
-        <torusGeometry args={[0.09, 0.018, 8, 16, Math.PI * 0.85]} />
-        <meshStandardMaterial color={LIP} roughness={0.55} />
-      </mesh>
+    let ox = x;
+    let oy = y;
+    let oz = z;
 
-      <mesh position={[0.16, -0.1, 0.2]}>
-        <sphereGeometry args={[0.025, 8, 8]} />
-        <meshStandardMaterial color="#a88868" roughness={0.5} />
-      </mesh>
-    </group>
-  );
+    // Bat hanging into the lower band — don't treat as a leg.
+    const isBat =
+      radial > BAT_RADIUS && z < ARM_MAX_Z && Math.abs(x) > 0.35;
+
+    // Waist / pelvis sway — light lateral only, keeps torso readable.
+    if (
+      !isBat &&
+      z >= LEG_MAX_Z &&
+      z < ARM_MIN_Z + 0.15 &&
+      radial < TORSO_RADIUS + 0.15
+    ) {
+      const waist =
+        Math.sin(((z - LEG_MAX_Z) / (ARM_MIN_Z - LEG_MAX_Z + 0.15)) * Math.PI) *
+        (moving ? 1 : 0.45);
+      ox = x + sinP * 0.22 * amp * waist;
+      oy = y;
+      oz = z + Math.abs(sinP) * 0.04 * amp * waist;
+    }
+
+    // Legs — hip pivot (YZ stride) + bold lift/lateral for front-cam read.
+    if (!isBat && z < LEG_MAX_Z && radial > LEG_CORE_RADIUS && Math.abs(x) > 0.1) {
+      // Soft-skin near hip; full weight on shins/feet. Three.js smoothstep is (x,min,max).
+      const attach =
+        1 - THREE.MathUtils.smoothstep(z, LEG_MAX_Z - 0.5, LEG_MAX_Z);
+      const mask = THREE.MathUtils.smoothstep(radial, LEG_CORE_RADIUS, 0.36);
+      const sideSep = THREE.MathUtils.smoothstep(Math.abs(x), 0.1, 0.26);
+      const w = attach * mask * sideSep;
+      const shin =
+        THREE.MathUtils.smoothstep(z, 0.05, 0.85) *
+        (1 - THREE.MathUtils.smoothstep(z, 0.85, 1.35));
+      // Swinging leg: phase where this side advances toward -Y.
+      const swingGate = Math.max(0, -cosP * side);
+      const plantGate = Math.max(0, cosP * side);
+      // Negative angle drives the foot toward -Y (facing direction).
+      const theta =
+        (-sinP * side * legAng + kneeKick * side * shin * swingGate) * w;
+      const c = Math.cos(theta);
+      const s = Math.sin(theta);
+      const dy = y;
+      const dz = z - HIP_Z;
+      oy = dy * c - dz * s;
+      oz = HIP_Z + dy * s + dz * c;
+      // Clear foot lift on the swinging leg (front-cam readable).
+      const foot = 1 - THREE.MathUtils.smoothstep(z, 0.1, 1.05);
+      oz += swingGate * liftAmp * w * foot;
+      // Planted leg compresses slightly — sells weight transfer.
+      oz -= plantGate * 0.12 * amp * w * foot;
+      // Lateral step so opposite legs diverge in silhouette.
+      ox = x + side * (0.16 + swingGate * latAmp) * amp * w;
+    }
+
+    // Arms + bat — counter-phase shoulder pivot with front-cam lateral read.
+    const inArmBand = z > ARM_MIN_Z && z < ARM_MAX_Z && radial > TORSO_RADIUS;
+    if (inArmBand || isBat) {
+      const band = inArmBand
+        ? THREE.MathUtils.smoothstep(z, ARM_MIN_Z, ARM_MIN_Z + 0.28)
+        : THREE.MathUtils.smoothstep(radial, BAT_RADIUS, BAT_RADIUS + 0.3);
+      const top =
+        1 - THREE.MathUtils.smoothstep(z, ARM_MAX_Z - 0.28, ARM_MAX_Z);
+      const out = THREE.MathUtils.smoothstep(
+        radial,
+        TORSO_RADIUS,
+        TORSO_RADIUS + 0.22,
+      );
+      const w = Math.min(1, band * top * out * (isBat ? 1.25 : 1));
+      // Counter to legs: when that leg goes forward (-Y), this arm swings back (+Y).
+      const theta = sinP * side * armAng * w;
+      const c = Math.cos(theta);
+      const s = Math.sin(theta);
+      const dy = y;
+      const dz = z - SHOULDER_Z;
+      oy = dy * c - dz * s;
+      oz = SHOULDER_Z + dy * s + dz * c;
+      // Forward arm lifts + flares out; back arm tucks — bat reads in silhouette.
+      const forwardGate = Math.max(0, sinP * side);
+      const backGate = Math.max(0, -sinP * side);
+      oz += (forwardGate * armLift - backGate * armLift * 0.35) * w;
+      ox =
+        x +
+        side *
+          (0.14 + forwardGate * armLat - backGate * armLat * 0.45) *
+          amp *
+          w;
+      // Extra bat tip travel along swing (outer verts).
+      if (isBat) {
+        oy -= sinP * side * 0.55 * amp * w;
+      }
+    }
+
+    arr[i] = ox;
+    arr[i + 1] = oy;
+    arr[i + 2] = oz;
+  }
+
+  position.needsUpdate = true;
 }
 
-function Eye({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      <mesh castShadow>
-        <sphereGeometry args={[0.095, 16, 16]} />
-        <meshStandardMaterial color={EYE_WHITE} roughness={0.15} metalness={0.05} />
-      </mesh>
-      <mesh position={[0.01, -0.01, 0.075]}>
-        <sphereGeometry args={[0.035, 12, 12]} />
-        <meshStandardMaterial color={PUPIL} roughness={0.4} />
-      </mesh>
-      <mesh position={[-0.03, 0.035, 0.085]}>
-        <sphereGeometry args={[0.015, 8, 8]} />
-        <meshBasicMaterial color="#ffffff" />
-      </mesh>
-    </group>
-  );
-}
-
-function Foot({ side }: { side: number }) {
-  return (
-    <group position={[0, -0.62, 0.08]} rotation={[0.08, side * 0.12, 0]}>
-      <mesh castShadow position={[0, 0, 0.08]} scale={[1.05, 0.45, 1.55]}>
-        <sphereGeometry args={[0.16, 12, 10]} />
-        <meshStandardMaterial color={FLESH} roughness={0.7} />
-      </mesh>
-      <mesh castShadow position={[0, 0.01, -0.12]} scale={[0.9, 0.5, 0.7]}>
-        <sphereGeometry args={[0.1, 10, 8]} />
-        <meshStandardMaterial color={FLESH_SHADOW} roughness={0.75} />
-      </mesh>
-      {[-0.08, -0.04, 0, 0.04, 0.08].map((x, i) => (
-        <mesh
-          key={i}
-          castShadow
-          position={[x * side * 0.15 + x, 0.01, 0.28 - Math.abs(x) * 0.15]}
-          scale={[0.7, 0.55, 0.9]}
-        >
-          <sphereGeometry args={[0.045 - Math.abs(i - 2) * 0.004, 8, 8]} />
-          <meshStandardMaterial color={FLESH} roughness={0.72} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function BatMesh() {
-  return (
-    <group>
-      <mesh castShadow position={[0, 0.35, 0]}>
-        <cylinderGeometry args={[0.035, 0.04, 0.55, 10]} />
-        <meshStandardMaterial color="#6b4f35" roughness={0.45} />
-      </mesh>
-      <mesh castShadow position={[0, 0.62, 0]}>
-        <sphereGeometry args={[0.05, 10, 10]} />
-        <meshStandardMaterial color="#5a412c" roughness={0.5} />
-      </mesh>
-      <mesh castShadow position={[0, -0.25, 0]}>
-        <cylinderGeometry args={[0.09, 0.055, 0.85, 14]} />
-        <meshStandardMaterial color="#a67c52" roughness={0.32} metalness={0.08} />
-      </mesh>
-      <mesh castShadow position={[0, -0.68, 0]}>
-        <sphereGeometry args={[0.09, 12, 10]} />
-        <meshStandardMaterial color="#9a724c" roughness={0.3} />
-      </mesh>
-    </group>
-  );
-}
+useGLTF.preload(MODEL_URL);

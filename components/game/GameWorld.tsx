@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import Sahur, { type SahurAnimState } from "./Sahur";
 import Obstacles3D from "./Obstacles3D";
@@ -154,7 +154,7 @@ export default function GameWorld({
     const dt = Math.min(0.033, dtRaw);
     const a = anim.current;
     const v = vel.current;
-    const margin = ARENA_SIZE - 0.7;
+    const margin = ARENA_SIZE - 1.1;
     const keys = keysRef.current;
     const motionScale = reducedMotion ? 0.2 : 1;
     const { camera } = state;
@@ -239,12 +239,12 @@ export default function GameWorld({
         ? (Math.random() - 0.5) * shake.current * 2 * motionScale
         : 0;
 
-    const camX = CAMERA_POS[0] + a.x * 0.18 + sx;
-    const camZ = CAMERA_POS[2] + a.z * 0.12 + sz;
-    camera.position.x += (camX - camera.position.x) * Math.min(1, dt * 3);
-    camera.position.z += (camZ - camera.position.z) * Math.min(1, dt * 3);
-    camera.position.y = CAMERA_POS[1];
-    camera.lookAt(a.x * 0.35, 0.5, a.z * 0.35);
+    const camX = CAMERA_POS[0] + a.x * 0.28 + sx;
+    const camZ = CAMERA_POS[2] + a.z * 0.22 + sz;
+    camera.position.x += (camX - camera.position.x) * Math.min(1, dt * 2.6);
+    camera.position.z += (camZ - camera.position.z) * Math.min(1, dt * 2.6);
+    camera.position.y = CAMERA_POS[1] + a.moveAmount * 0.4;
+    camera.lookAt(a.x * 0.3, 3.4, a.z * 0.3);
 
     hudTick.current += dt;
     if (phaseRef.current === "playing" && hudTick.current > 0.1) {
@@ -259,7 +259,9 @@ export default function GameWorld({
 
   return (
     <>
-      <Sahur anim={anim} reducedMotion={reducedMotion} />
+      <Suspense fallback={null}>
+        <Sahur anim={anim} reducedMotion={reducedMotion} />
+      </Suspense>
       <Obstacles3D obstaclesRef={obstaclesRef} />
     </>
   );

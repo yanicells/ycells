@@ -24,24 +24,24 @@ let nextId = 1;
 export function spawnObstacle(difficulty: number): Obstacle {
   const kind = KINDS[Math.floor(Math.random() * KINDS.length)];
   const edge = Math.floor(Math.random() * 4);
-  const speed = 2.4 + difficulty * 0.55 + Math.random() * 1.2;
+  const speed = 3.1 + difficulty * 0.65 + Math.random() * 1.4;
   const bound = ARENA_SIZE;
 
-  let w = 0.9;
-  let d = 0.55;
-  let h = 0.45;
+  let w = 1.7;
+  let d = 0.95;
+  let h = 0.8;
   if (kind === "cylinder") {
-    w = 0.55 + Math.random() * 0.2;
+    w = 1.15 + Math.random() * 0.45;
     d = w;
-    h = 1.1 + Math.random() * 0.4;
+    h = 2.2 + Math.random() * 0.9;
   } else if (kind === "block") {
-    w = 0.7 + Math.random() * 0.45;
-    d = 0.7 + Math.random() * 0.35;
-    h = 0.7 + Math.random() * 0.35;
+    w = 1.4 + Math.random() * 0.85;
+    d = 1.35 + Math.random() * 0.65;
+    h = 1.35 + Math.random() * 0.7;
   } else {
-    w = 1.1 + Math.random() * 0.35;
-    d = 0.35 + Math.random() * 0.15;
-    h = 0.28 + Math.random() * 0.12;
+    w = 2.2 + Math.random() * 0.7;
+    d = 0.65 + Math.random() * 0.28;
+    h = 0.55 + Math.random() * 0.22;
   }
 
   let x = 0;
@@ -92,7 +92,7 @@ export function updateObstacles(
   obstacles: Obstacle[],
   dt: number,
 ): Obstacle[] {
-  const limit = ARENA_SIZE + 4;
+  const limit = ARENA_SIZE + 8;
   return obstacles
     .map((o) => ({
       ...o,

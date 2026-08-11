@@ -1,37 +1,55 @@
 "use client";
 
 import { ContactShadows } from "@react-three/drei";
-import { ARENA_SIZE } from "./constants";
+import {
+  ARENA_SIZE,
+  FLOOR,
+  FLOOR_LINE,
+  RIM,
+  VOID_BG,
+  VOID_FOG,
+} from "./constants";
 
 export default function Arena() {
   const size = ARENA_SIZE * 2;
-  const gridStep = 2;
+  const gridStep = 4;
 
   return (
     <group>
-      <color attach="background" args={["#050506"]} />
-      <fog attach="fog" args={["#050506", 18, 36]} />
+      <color attach="background" args={[VOID_BG]} />
+      <fog attach="fog" args={[VOID_FOG, 55, 110]} />
 
-      <ambientLight intensity={0.22} color="#b8a890" />
+      <ambientLight intensity={0.78} color="#e4dcd0" />
+      <hemisphereLight
+        intensity={0.9}
+        color="#fff8f0"
+        groundColor="#343648"
+      />
       <directionalLight
         castShadow
-        position={[6, 14, 4]}
-        intensity={1.55}
-        color="#fff4e6"
-        shadow-mapSize={[1024, 1024]}
+        position={[10, 18, 8]}
+        intensity={3.0}
+        color="#fffaf4"
+        shadow-mapSize={[2048, 2048]}
         shadow-camera-near={1}
-        shadow-camera-far={40}
-        shadow-camera-left={-12}
-        shadow-camera-right={12}
-        shadow-camera-top={12}
-        shadow-camera-bottom={-12}
+        shadow-camera-far={110}
+        shadow-camera-left={-44}
+        shadow-camera-right={44}
+        shadow-camera-top={44}
+        shadow-camera-bottom={-44}
+        shadow-bias={-0.0002}
       />
       <directionalLight
-        position={[-8, 6, -6]}
-        intensity={0.55}
-        color="#8ab4ff"
+        position={[-14, 10, -8]}
+        intensity={1.05}
+        color="#a8bcff"
       />
-      <pointLight position={[0, 4, 0]} intensity={0.35} color="#c4a882" distance={18} />
+      <pointLight
+        position={[0, 9, 3]}
+        intensity={0.95}
+        color="#f0d2a8"
+        distance={52}
+      />
 
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
@@ -40,31 +58,37 @@ export default function Arena() {
       >
         <planeGeometry args={[size, size]} />
         <meshStandardMaterial
-          color="#121214"
-          roughness={0.92}
-          metalness={0.04}
+          color={FLOOR}
+          roughness={0.88}
+          metalness={0.06}
         />
       </mesh>
 
-      {/* Subtle void floor rim */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
-        <ringGeometry args={[ARENA_SIZE - 0.08, ARENA_SIZE, 64]} />
-        <meshBasicMaterial color="#c4a882" transparent opacity={0.22} />
+        <ringGeometry args={[ARENA_SIZE - 0.12, ARENA_SIZE, 96]} />
+        <meshBasicMaterial color={RIM} transparent opacity={0.55} />
       </mesh>
 
-      {/* Perspective grid lines */}
       <group position={[0, 0.01, 0]}>
         {Array.from({ length: Math.floor(size / gridStep) + 1 }, (_, i) => {
           const t = -ARENA_SIZE + i * gridStep;
           return (
             <group key={i}>
               <mesh position={[0, 0, t]}>
-                <boxGeometry args={[size, 0.01, 0.02]} />
-                <meshBasicMaterial color="#2a2622" transparent opacity={0.55} />
+                <boxGeometry args={[size, 0.012, 0.028]} />
+                <meshBasicMaterial
+                  color={FLOOR_LINE}
+                  transparent
+                  opacity={0.9}
+                />
               </mesh>
               <mesh position={[t, 0, 0]}>
-                <boxGeometry args={[0.02, 0.01, size]} />
-                <meshBasicMaterial color="#2a2622" transparent opacity={0.55} />
+                <boxGeometry args={[0.028, 0.012, size]} />
+                <meshBasicMaterial
+                  color={FLOOR_LINE}
+                  transparent
+                  opacity={0.9}
+                />
               </mesh>
             </group>
           );
@@ -73,10 +97,10 @@ export default function Arena() {
 
       <ContactShadows
         position={[0, 0.01, 0]}
-        opacity={0.55}
+        opacity={0.45}
         scale={size}
-        blur={2.4}
-        far={8}
+        blur={2.8}
+        far={12}
         color="#000000"
       />
     </group>
