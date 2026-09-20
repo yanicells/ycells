@@ -1,6 +1,5 @@
 import {
   ACESFilmicToneMapping,
-  Box3,
   Color,
   DirectionalLight,
   HemisphereLight,
@@ -11,8 +10,6 @@ import {
   PlaneGeometry,
   PMREMGenerator,
   Scene,
-  Sphere,
-  Vector3,
   WebGLRenderer,
 } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -97,7 +94,7 @@ export function mountSpecimen(
   controls.minPolarAngle = 0.15;
   controls.maxPolarAngle = Math.PI - 0.15;
 
-  const radius = new Box3().setFromObject(mineral.group).getBoundingSphere(new Sphere()).radius;
+  const radius = mineral.radius;
   const lightTarget = key.position.clone();
   const lightHome = key.position.clone();
   let frame = 0;

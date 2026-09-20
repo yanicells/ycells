@@ -294,9 +294,22 @@ export function createMineral() {
   const center = new Box3().setFromObject(group).getCenter(new Vector3());
   group.children.forEach((child) => child.position.sub(center));
   group.rotation.set(0.2, -0.35, -0.18);
+  group.updateMatrixWorld(true);
+
+  // Fit the actual vertices, not the empty corners of a rotated bounding box.
+  const vertex = new Vector3();
+  let radius = 0;
+  geometries.forEach((geometry, i) => {
+    const position = geometry.getAttribute("position");
+    for (let j = 0; j < position.count; j++) {
+      vertex.fromBufferAttribute(position, j).applyMatrix4(group.children[i].matrixWorld);
+      radius = Math.max(radius, vertex.length());
+    }
+  });
 
   return {
     group,
+    radius,
     dispose() {
       geometries.forEach((geometry) => geometry.dispose());
       materials.forEach((material) => material.dispose());
