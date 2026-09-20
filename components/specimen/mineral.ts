@@ -1,6 +1,5 @@
 import {
   Box3,
-  BoxGeometry,
   BufferGeometry,
   Color,
   CylinderGeometry,
@@ -71,7 +70,7 @@ function surface(direction: Vector3) {
     const alignment = direction.dot(fracture.normal);
     if (alignment > 0) radius = Math.min(radius, fracture.distance / alignment);
   }
-  radius += (broad - 0.5) * 0.15 + (chips - 0.5) * 0.045;
+  radius += (broad - 0.5) * 0.23 + (chips - 0.5) * 0.085;
   return new Vector3(
     x * radius * 1.18,
     y * radius * 0.94,
@@ -98,10 +97,10 @@ function tintGeometry(geometry: BufferGeometry, base: Color, variation: number) 
 }
 
 function createMatrix() {
-  const geometry = new IcosahedronGeometry(1, 34);
+  const geometry = new IcosahedronGeometry(1, 44);
   const position = geometry.getAttribute("position");
   const colors: number[] = [];
-  const chalk = new Color("#b2a699");
+  const chalk = new Color("#a69a8b");
   const smoky = new Color("#393532");
   const blush = new Color("#97776e");
   const color = new Color();
@@ -135,13 +134,21 @@ function createCrystal(radius: number, length: number, seed: number) {
     { y: length * 0.35, r: radius * 0.93 },
     { y: length / 2, r: radius * 0.65 },
   ];
+  const edgeSteps = 6;
+  const perimeter = 6 * edgeSteps;
+  const tipHeights = Array.from({ length: 6 }, () => (random() - 0.5) * length * 0.12);
   const vertices = rings.map((ring, row) =>
-    Array.from({ length: 6 }, (_, i) => {
-      const angle = (i / 6) * Math.PI * 2;
+    Array.from({ length: perimeter }, (_, i) => {
+      const side = Math.floor(i / edgeSteps);
+      const step = (i % edgeSteps) / edgeSteps;
+      const angle = (side / 6) * Math.PI * 2;
+      const next = ((side + 1) / 6) * Math.PI * 2;
+      // Fine longitudinal grooves catch narrow highlights along the prism.
+      const groove = i % 2 === 0 ? 1 : 0.986;
       return new Vector3(
-        Math.cos(angle) * ring.r,
-        ring.y + (row === 3 ? (random() - 0.5) * length * 0.12 : 0),
-        Math.sin(angle) * ring.r,
+        (Math.cos(angle) * (1 - step) + Math.cos(next) * step) * ring.r * groove,
+        ring.y + (row === 3 ? tipHeights[side] * (1 - step) + tipHeights[(side + 1) % 6] * step : 0),
+        (Math.sin(angle) * (1 - step) + Math.sin(next) * step) * ring.r * groove,
       );
     }),
   );
@@ -154,15 +161,18 @@ function createCrystal(radius: number, length: number, seed: number) {
   }
 
   for (let row = 0; row < rings.length - 1; row++) {
-    for (let i = 0; i < 6; i++) {
-      const j = (i + 1) % 6;
+    for (let i = 0; i < perimeter; i++) {
+      const j = (i + 1) % perimeter;
       triangle(vertices[row][i], vertices[row + 1][i], vertices[row][j]);
       triangle(vertices[row][j], vertices[row + 1][i], vertices[row + 1][j]);
     }
   }
-  for (let i = 1; i < 5; i++) {
-    triangle(vertices[0][0], vertices[0][i], vertices[0][i + 1]);
-    triangle(vertices[3][0], vertices[3][i + 1], vertices[3][i]);
+  const bottom = new Vector3(0, -length / 2, 0);
+  const top = new Vector3(0, length / 2, 0);
+  for (let i = 0; i < perimeter; i++) {
+    const j = (i + 1) % perimeter;
+    triangle(bottom, vertices[0][i], vertices[0][j]);
+    triangle(top, vertices[3][j], vertices[3][i]);
   }
 
   const geometry = new BufferGeometry();
@@ -222,11 +232,11 @@ export function createMineral() {
   const rotation = new Quaternion();
   const transform = new Matrix4();
   const unitScale = new Vector3(1, 1, 1);
-  const redColors = ["#7f1838", "#ab3d55", "#541a30", "#ba5363", "#70203b"];
+  const redColors = ["#7f1838", "#ab3d55", "#541a30", "#a34657", "#70203b"];
 
   const clusters = [
-    new Vector3(-0.64, 0.24, 0.76),
-    new Vector3(0.32, -0.64, 0.7),
+    new Vector3(-0.2, 0.15, 1),
+    new Vector3(0.35, -0.43, 0.88),
     new Vector3(-0.32, 0.86, -0.24),
     new Vector3(0.8, 0.05, -0.48),
     new Vector3(-0.2, -0.35, -0.88),
@@ -235,13 +245,13 @@ export function createMineral() {
   // Inclusions emerge in seams; most of each prism remains inside the matrix.
   for (let i = 0; i < 26; i++) {
     const direction = clusters[i % clusters.length].clone().add(
-      new Vector3((random() - 0.5) * 0.28, (random() - 0.5) * 0.38, (random() - 0.5) * 0.2),
+      new Vector3((random() - 0.5) * 0.5, (random() - 0.5) * 0.5, (random() - 0.5) * 0.2),
     ).normalize();
-    const point = surface(direction).multiplyScalar(0.91);
+    const point = surface(direction).multiplyScalar(0.97);
     const axis = new Vector3(-0.38 + random() * 0.16, 0.85, 0.12 + random() * 0.16).normalize();
     rotation.setFromUnitVectors(UP, axis);
-    const radius = 0.07 + random() ** 1.4 * 0.115;
-    const geometry = createCrystal(radius, 0.28 + random() * 0.58, 370 + i);
+    const radius = 0.09 + random() ** 1.4 * 0.13;
+    const geometry = createCrystal(radius, 0.34 + random() * 0.64, 370 + i);
     geometry.applyMatrix4(transform.compose(point, rotation, unitScale));
     tintGeometry(geometry, new Color(redColors[i % redColors.length]), 0.22);
     reds.push(geometry);
@@ -265,22 +275,12 @@ export function createMineral() {
     const direction = new Vector3(random() - 0.5, random() - 0.5, random() - 0.5).normalize();
     const point = surface(direction).multiplyScalar(1.006);
     const size = 0.015 + random() ** 2 * 0.065;
-    const geometry = new BoxGeometry(size, 0.004 + random() * 0.01, size * (0.6 + random())).toNonIndexed();
+    const geometry = new CylinderGeometry(size * 0.55, size * 0.6, 0.004 + random() * 0.005, 5).toNonIndexed();
     rotation.setFromUnitVectors(UP, direction);
     rotation.multiply(new Quaternion().setFromAxisAngle(UP, random() * Math.PI));
     geometry.applyMatrix4(transform.compose(point, rotation, unitScale));
     tintGeometry(geometry, new Color(i % 3 === 0 ? "#c6b397" : "#827975"), 0.2);
     mica.push(geometry);
-  }
-
-  // A few larger cleavage surfaces keep the form from reading as a smooth pebble.
-  for (let i = 0; i < 12; i++) {
-    const direction = new Vector3(random() - 0.5, random() - 0.5, random() - 0.5).normalize();
-    const geometry = new CylinderGeometry(0.1 + random() * 0.08, 0.16, 0.06, 5).toNonIndexed();
-    rotation.setFromUnitVectors(UP, direction);
-    geometry.applyMatrix4(transform.compose(surface(direction), rotation, unitScale));
-    tintGeometry(geometry, new Color("#aca092"), 0.23);
-    quartz.push(geometry);
   }
 
   const geometries = [matrix, mergeParts(reds), mergeParts(quartz), mergeParts(mica)];
