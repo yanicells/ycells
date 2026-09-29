@@ -13,11 +13,18 @@ to zoom, and Home or Escape to reset.
 
 ## Implementation
 
-Next.js, TypeScript, and Three.js. The original model and materials are generated
-locally: a fractured pale matrix with dark red, tourmaline-inspired inclusions.
-It is an artistic interpretation of a rubidium-bearing mineral specimen, **not
-pure elemental rubidium** or a reconstruction of a particular photographed sample.
-No third-party photographs, textures, fonts, or model downloads are used.
+Next.js, TypeScript, and Three.js. The specimen is generated locally with no
+downloaded models or textures: a fractured smoky-quartz block with iron-oxide
+staining, dark mica, a chalky pocket, translucent rubellite (pink tourmaline)
+prisms and olive-green crystals. It is an artistic interpretation of a
+rubidium-bearing mineral specimen, **not pure elemental rubidium**.
+
+- `rock.ts` carves the block from fracture planes, bakes cavity shading, and
+  computes broad colour per vertex.
+- `rockMaterial.ts` draws the fine detail per pixel in object space: cellular
+  mineral grains, feldspar flecks, sugary rust, and micro-relief bump.
+- `crystals.ts` builds the striated hexagonal prisms; `mineral.ts` assembles
+  and places them, and `scene.ts` sets up lighting and controls.
 
 The 3D engine loads separately from the page. Rendering runs on demand, pauses in
 hidden tabs, and caps the drawing-buffer resolution. Reduced motion disables
@@ -34,16 +41,18 @@ Reference: [rubidium's properties and occurrence](https://periodic-table.rsc.org
 
 ## Regenerating the poster
 
-The checked-in poster needs no build-time tools. To update it after changing the
-model, use Bun and Blender in background mode:
+The checked-in poster (`public/specimen.webp`) is a 1000×1000 capture of the live
+scene, shown until WebGL is ready. Rebuild it after changing the model or camera:
 
 ```sh
-bun scripts/export-specimen.ts --output /tmp/ycells-specimen.json
-blender --background --python scripts/render-specimen.py -- \
-  --input /tmp/ycells-specimen.json --output public/specimen.webp \
-  --preview /tmp/ycells-specimen-preview.png --size 1000
+pnpm build && pnpm start -p 3112 &
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
+  --screenshot=/tmp/poster.png --window-size=1000,1000 --hide-scrollbars \
+  --virtual-time-budget=40000 --use-angle=swiftshader --enable-unsafe-swiftshader \
+  --ignore-gpu-blocklist http://localhost:3112
 ```
 
-The poster uses the same mesh and camera fit with approximate Blender lighting;
-it is not a browser screenshot. The live version adds pointer-responsive light
-and physically based reflections.
+Then convert `/tmp/poster.png` to WebP (for example with Pillow:
+`Image.open(...).save("public/specimen.webp", "WEBP", quality=88)`).
+`scripts/export-specimen.ts` and `scripts/render-specimen.py` are the older Blender
+route; they do not reproduce the shader-based surface.
