@@ -2,184 +2,94 @@ import {
   Box3,
   BufferGeometry,
   Color,
-  CylinderGeometry,
-  DataTexture,
-  Float32BufferAttribute,
   Group,
-  IcosahedronGeometry,
-  LinearFilter,
-  LinearMipmapLinearFilter,
   Matrix4,
   Mesh,
   MeshPhysicalMaterial,
-  MeshStandardMaterial,
   Quaternion,
-  RepeatWrapping,
-  RGBAFormat,
   Vector3,
 } from "three";
-import { mergeGeometries, mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
-import { fractal, noise, randomSource } from "./noise";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { createCrystal } from "./crystals";
+import { createRock, Groove, surfacePoint } from "./rock";
+import { createRockMaterial } from "./rockMaterial";
 
 const UP = new Vector3(0, 1, 0);
-const FRACTURES = [
-  { normal: new Vector3(1, 0.18, 0.15).normalize(), distance: 0.9 },
-  { normal: new Vector3(-1, 0.1, 0.1).normalize(), distance: 0.92 },
-  { normal: new Vector3(-0.2, 1, 0.3).normalize(), distance: 0.79 },
-  { normal: new Vector3(0.3, -1, 0.2).normalize(), distance: 0.75 },
-  { normal: new Vector3(0.12, 0.28, 1).normalize(), distance: 0.8 },
-  { normal: new Vector3(-0.3, 0.15, -1).normalize(), distance: 0.78 },
-  { normal: new Vector3(0.8, 0.6, 0.8).normalize(), distance: 0.93 },
-  { normal: new Vector3(-0.8, -0.7, 0.6).normalize(), distance: 0.82 },
-  { normal: new Vector3(0.6, -0.5, -0.8).normalize(), distance: 0.88 },
+
+interface CrystalSpec {
+  /** Where on the rock surface the crystal is rooted. */
+  at: [number, number, number];
+  /** Growth direction of the terminated end. */
+  axis: [number, number, number];
+  radius: number;
+  length: number;
+  top: string;
+  bottom: string;
+  /** 1 leaves the centre on the surface; lower values bury more of the crystal. */
+  inset?: number;
+  /** Carve a trench for the crystal to lie in. */
+  groove?: boolean;
+}
+
+// Rubellite (pink-red tourmaline) is the star; olive-green crystals sit in the pocket.
+const RUBELLITE: CrystalSpec[] = [
+  { at: [-0.42, -0.02, 0.9], axis: [-0.5, 0.86, 0.1], radius: 0.125, length: 0.95, top: "#d8244f", bottom: "#33101f", inset: 0.86, groove: true },
+  { at: [-0.32, -0.52, 0.8], axis: [-0.4, 0.7, 0.5], radius: 0.13, length: 0.36, top: "#e0386a", bottom: "#8c2048", inset: 0.9 },
+  { at: [-0.5, -0.4, 0.72], axis: [-0.7, 0.4, 0.6], radius: 0.06, length: 0.3, top: "#d63a52", bottom: "#7a1c38", inset: 0.92 },
+  { at: [-0.62, -0.28, 0.66], axis: [-0.3, 0.5, 0.8], radius: 0.05, length: 0.26, top: "#e0503a", bottom: "#8f2a22", inset: 0.9 },
+  { at: [-0.2, -0.62, 0.75], axis: [0.2, 0.6, 0.7], radius: 0.055, length: 0.3, top: "#d8305a", bottom: "#701c3a", inset: 0.88 },
+  { at: [-0.05, -0.7, 0.72], axis: [0.5, 0.5, 0.7], radius: 0.045, length: 0.28, top: "#e0405e", bottom: "#7a2040", inset: 0.88 },
+  { at: [-0.7, -0.05, 0.6], axis: [-0.5, 0.6, 0.6], radius: 0.05, length: 0.3, top: "#dc3a48", bottom: "#7c1e2c", inset: 0.9 },
+  { at: [0.12, 0.92, 0.3], axis: [0.75, 0.35, 0.3], radius: 0.06, length: 0.55, top: "#d0284e", bottom: "#5a1028", inset: 0.86 },
+  { at: [0.72, 0.62, -0.05], axis: [0.5, 0.5, 0.4], radius: 0.05, length: 0.4, top: "#c22b50", bottom: "#701436", inset: 0.88 },
+  { at: [0.96, -0.1, 0.2], axis: [0.7, 0.2, 0.5], radius: 0.05, length: 0.3, top: "#dd4a72", bottom: "#8a2a4c", inset: 0.9 },
+  { at: [0.52, -0.18, 0.85], axis: [0.1, 0.9, 0.3], radius: 0.07, length: 0.4, top: "#8a2444", bottom: "#33101f", inset: 0.88 },
+  { at: [0.4, -0.5, 0.75], axis: [0.3, 0.7, 0.5], radius: 0.05, length: 0.3, top: "#c83452", bottom: "#5c1830", inset: 0.9 },
 ];
 
-/** A single, reusable grain map; no downloaded textures or model assets. */
-function createGrain() {
-  const size = 256;
-  const data = new Uint8Array(size * size * 4);
-  const random = randomSource(370);
+const GREEN: CrystalSpec[] = [
+  { at: [0.26, -0.28, 0.9], axis: [0.2, 0.6, 0.7], radius: 0.125, length: 0.28, top: "#c9cf50", bottom: "#7d9030", inset: 0.93 },
+  { at: [0.64, -0.24, 0.72], axis: [-0.1, 0.5, 0.8], radius: 0.12, length: 0.26, top: "#cdd04a", bottom: "#899a2c", inset: 0.93 },
+  { at: [-0.55, 0.5, 0.6], axis: [-0.4, 0.5, 0.7], radius: 0.09, length: 0.2, top: "#a9ad40", bottom: "#6f7a2a", inset: 0.95 },
+];
 
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const i = (y * size + x) * 4;
-      const grain = random();
-      const layers = Math.sin((x / size) * Math.PI * 48 + Math.sin((y / size) * Math.PI * 8));
-      const value = Math.floor(135 + grain * 95 + layers * 20);
-      data[i] = data[i + 1] = data[i + 2] = value;
-      data[i + 3] = 255;
-    }
-  }
-
-  const texture = new DataTexture(data, size, size, RGBAFormat);
-  texture.wrapS = texture.wrapT = RepeatWrapping;
-  texture.repeat.set(5, 5);
-  texture.generateMipmaps = true;
-  texture.magFilter = LinearFilter;
-  texture.minFilter = LinearMipmapLinearFilter;
-  texture.needsUpdate = true;
-  return texture;
+/** Trenches along the crystals that should look embedded rather than stuck on. */
+function crystalGrooves(specs: CrystalSpec[]): Groove[] {
+  return specs
+    .filter((spec) => spec.groove)
+    .map((spec) => {
+      const axis = new Vector3(...spec.axis).normalize();
+      const center = surfacePoint(new Vector3(...spec.at), spec.inset ?? 1);
+      const half = axis.multiplyScalar(spec.length / 2);
+      return {
+        from: center.clone().sub(half),
+        to: center.clone().add(half),
+        width: spec.radius * 3.2,
+        depth: 0.13,
+      };
+    });
 }
 
-function surface(direction: Vector3) {
-  const { x, y, z } = direction;
-  const broad = fractal(x * 2.6 + 8, y * 2.6 + 3, z * 2.6 + 5);
-  const chips = noise(x * 17 + 8, y * 17, z * 17);
-  let radius = 1.2;
-  for (const fracture of FRACTURES) {
-    const alignment = direction.dot(fracture.normal);
-    if (alignment > 0) radius = Math.min(radius, fracture.distance / alignment);
-  }
-  radius += (broad - 0.5) * 0.23 + (chips - 0.5) * 0.085;
-  return new Vector3(
-    x * radius * 1.18,
-    y * radius * 0.94,
-    z * radius * 0.74,
-  );
-}
+function buildCrystals(specs: CrystalSpec[], seed: number) {
+  const parts: BufferGeometry[] = [];
+  const rotation = new Quaternion();
+  const transform = new Matrix4();
+  const unit = new Vector3(1, 1, 1);
 
-function tintGeometry(geometry: BufferGeometry, base: Color, variation: number) {
-  const position = geometry.getAttribute("position");
-  const colors: number[] = [];
-  const color = new Color();
-
-  for (let i = 0; i < position.count; i++) {
-    const x = position.getX(i);
-    const y = position.getY(i);
-    const z = position.getZ(i);
-    const value = noise(x * 14 + 10, y * 14, z * 14);
-    color.copy(base).multiplyScalar(1 - variation + value * variation * 2);
-    colors.push(color.r, color.g, color.b);
-  }
-
-  geometry.setAttribute("color", new Float32BufferAttribute(colors, 3));
-  return geometry;
-}
-
-function createMatrix() {
-  const geometry = new IcosahedronGeometry(1, 44);
-  const position = geometry.getAttribute("position");
-  const colors: number[] = [];
-  const chalk = new Color("#a69a8b");
-  const smoky = new Color("#393532");
-  const blush = new Color("#97776e");
-  const color = new Color();
-
-  for (let i = 0; i < position.count; i++) {
-    const point = surface(new Vector3().fromBufferAttribute(position, i).normalize());
-    position.setXYZ(i, point.x, point.y, point.z);
-    const vein = fractal(point.x * 6 + 3, point.y * 7, point.z * 6);
-    const fine = noise(point.x * 47, point.y * 47, point.z * 47);
-    color.copy(smoky).lerp(chalk, Math.min(1, Math.max(0, (vein - 0.25) * 2.4)));
-    color.lerp(blush, Math.max(0, noise(point.x * 4, point.y * 5, point.z * 4) - 0.5));
-    color.multiplyScalar(0.72 + fine * 0.43);
-    colors.push(color.r, color.g, color.b);
-  }
-
-  geometry.setAttribute("color", new Float32BufferAttribute(colors, 3));
-  const smoothGeometry = mergeVertices(geometry);
-  geometry.dispose();
-  smoothGeometry.computeVertexNormals();
-  return smoothGeometry;
-}
-
-/** Beveled hexagonal prisms with uneven, broken terminations. */
-function createCrystal(radius: number, length: number, seed: number) {
-  const random = randomSource(seed);
-  const points: number[] = [];
-  const uvs: number[] = [];
-  const rings = [
-    { y: -length / 2, r: radius * 0.8 },
-    { y: -length * 0.43, r: radius },
-    { y: length * 0.35, r: radius * 0.93 },
-    { y: length / 2, r: radius * 0.65 },
-  ];
-  const edgeSteps = 6;
-  const perimeter = 6 * edgeSteps;
-  const tipHeights = Array.from({ length: 6 }, () => (random() - 0.5) * length * 0.12);
-  const vertices = rings.map((ring, row) =>
-    Array.from({ length: perimeter }, (_, i) => {
-      const side = Math.floor(i / edgeSteps);
-      const step = (i % edgeSteps) / edgeSteps;
-      const angle = (side / 6) * Math.PI * 2;
-      const next = ((side + 1) / 6) * Math.PI * 2;
-      // Fine longitudinal grooves catch narrow highlights along the prism.
-      const groove = i % 2 === 0 ? 1 : 0.986;
-      return new Vector3(
-        (Math.cos(angle) * (1 - step) + Math.cos(next) * step) * ring.r * groove,
-        ring.y + (row === 3 ? tipHeights[side] * (1 - step) + tipHeights[(side + 1) % 6] * step : 0),
-        (Math.sin(angle) * (1 - step) + Math.sin(next) * step) * ring.r * groove,
-      );
-    }),
-  );
-
-  function triangle(a: Vector3, b: Vector3, c: Vector3) {
-    for (const point of [a, b, c]) {
-      points.push(point.x, point.y, point.z);
-      uvs.push(point.x / radius, point.y / length);
-    }
-  }
-
-  for (let row = 0; row < rings.length - 1; row++) {
-    for (let i = 0; i < perimeter; i++) {
-      const j = (i + 1) % perimeter;
-      triangle(vertices[row][i], vertices[row + 1][i], vertices[row][j]);
-      triangle(vertices[row][j], vertices[row + 1][i], vertices[row + 1][j]);
-    }
-  }
-  const bottom = new Vector3(0, -length / 2, 0);
-  const top = new Vector3(0, length / 2, 0);
-  for (let i = 0; i < perimeter; i++) {
-    const j = (i + 1) % perimeter;
-    triangle(bottom, vertices[0][i], vertices[0][j]);
-    triangle(top, vertices[3][j], vertices[3][i]);
-  }
-
-  const geometry = new BufferGeometry();
-  geometry.setAttribute("position", new Float32BufferAttribute(points, 3));
-  geometry.setAttribute("uv", new Float32BufferAttribute(uvs, 2));
-  geometry.computeVertexNormals();
-  return geometry;
+  specs.forEach((spec, i) => {
+    const geometry = createCrystal({
+      radius: spec.radius,
+      length: spec.length,
+      seed: seed + i * 17,
+      top: new Color(spec.top),
+      bottom: new Color(spec.bottom),
+    });
+    const point = surfacePoint(new Vector3(...spec.at), spec.inset ?? 1);
+    rotation.setFromUnitVectors(UP, new Vector3(...spec.axis).normalize());
+    geometry.applyMatrix4(transform.compose(point, rotation, unit));
+    parts.push(geometry);
+  });
+  return parts;
 }
 
 function mergeParts(parts: BufferGeometry[]) {
@@ -189,102 +99,44 @@ function mergeParts(parts: BufferGeometry[]) {
   return geometry;
 }
 
-/** Artistic rubidium-bearing matrix with tourmaline-like inclusions, not pure Rb. */
+/** Artistic rubidium-bearing specimen (lepidolite / rubellite pegmatite), not pure Rb. */
 export function createMineral() {
   const group = new Group();
-  const random = randomSource(8537);
-  const grain = createGrain();
-  const matrixMaterial = new MeshStandardMaterial({
-    vertexColors: true,
-    roughness: 0.87,
-    bumpMap: grain,
-    bumpScale: 0.035,
-    flatShading: false,
-  });
+
+  const rockMaterial = createRockMaterial();
+  // Transmission lets light pass through and tint, so the prisms read as gem, not plastic.
   const crystalMaterial = new MeshPhysicalMaterial({
     vertexColors: true,
-    roughness: 0.24,
-    metalness: 0.05,
-    clearcoat: 0.85,
-    clearcoatRoughness: 0.16,
+    roughness: 0.05,
+    transmission: 0.55,
+    thickness: 0.3,
     ior: 1.62,
-    bumpMap: grain,
-    bumpScale: 0.003,
+    attenuationColor: new Color("#8a0c30"),
+    attenuationDistance: 0.45,
+    // A faint inner glow stands in for light scattering inside the crystal.
+    emissive: new Color("#4a0616"),
+    emissiveIntensity: 0.7,
+    clearcoat: 1,
+    clearcoatRoughness: 0.06,
   });
-  const quartzMaterial = new MeshPhysicalMaterial({
+  const greenMaterial = new MeshPhysicalMaterial({
     vertexColors: true,
-    roughness: 0.35,
-    clearcoat: 0.55,
-    ior: 1.54,
-    bumpMap: grain,
-    bumpScale: 0.008,
-  });
-  const micaMaterial = new MeshStandardMaterial({
-    vertexColors: true,
-    roughness: 0.38,
-    metalness: 0.55,
+    roughness: 0.28,
+    transmission: 0.3,
+    thickness: 0.2,
+    ior: 1.6,
+    attenuationColor: new Color("#8b9a1c"),
+    attenuationDistance: 0.5,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.2,
   });
 
-  const reds: BufferGeometry[] = [];
-  const quartz: BufferGeometry[] = [];
-  const mica: BufferGeometry[] = [];
-  const matrix = createMatrix();
-  const rotation = new Quaternion();
-  const transform = new Matrix4();
-  const unitScale = new Vector3(1, 1, 1);
-  const redColors = ["#7f1838", "#ab3d55", "#541a30", "#a34657", "#70203b"];
-
-  const clusters = [
-    new Vector3(-0.2, 0.15, 1),
-    new Vector3(0.35, -0.43, 0.88),
-    new Vector3(-0.32, 0.86, -0.24),
-    new Vector3(0.8, 0.05, -0.48),
-    new Vector3(-0.2, -0.35, -0.88),
+  const geometries = [
+    createRock(crystalGrooves(RUBELLITE)),
+    mergeParts(buildCrystals(RUBELLITE, 370)),
+    mergeParts(buildCrystals(GREEN, 910)),
   ];
-
-  // Inclusions emerge in seams; most of each prism remains inside the matrix.
-  for (let i = 0; i < 26; i++) {
-    const direction = clusters[i % clusters.length].clone().add(
-      new Vector3((random() - 0.5) * 0.5, (random() - 0.5) * 0.5, (random() - 0.5) * 0.2),
-    ).normalize();
-    const point = surface(direction).multiplyScalar(0.97);
-    const axis = new Vector3(-0.38 + random() * 0.16, 0.85, 0.12 + random() * 0.16).normalize();
-    rotation.setFromUnitVectors(UP, axis);
-    const radius = 0.09 + random() ** 1.4 * 0.13;
-    const geometry = createCrystal(radius, 0.34 + random() * 0.64, 370 + i);
-    geometry.applyMatrix4(transform.compose(point, rotation, unitScale));
-    tintGeometry(geometry, new Color(redColors[i % redColors.length]), 0.22);
-    reds.push(geometry);
-  }
-
-  // Small pale fracture faces break up the silhouette and give the matrix depth.
-  for (let i = 0; i < 90; i++) {
-    const direction = new Vector3(random() - 0.5, random() - 0.5, random() - 0.5).normalize();
-    const point = surface(direction).multiplyScalar(0.99);
-    const axis = direction.clone().add(new Vector3(-0.2, 0.5, 0)).normalize();
-    rotation.setFromUnitVectors(UP, axis);
-    const size = 0.025 + random() * 0.065;
-    const geometry = new IcosahedronGeometry(1, 0).scale(size * 1.4, size * 0.65, size);
-    geometry.applyMatrix4(transform.compose(point, rotation, unitScale));
-    tintGeometry(geometry, new Color(i % 7 === 0 ? "#9f8c54" : "#b9aa98"), 0.2);
-    quartz.push(geometry);
-  }
-
-  // Reflective cleavage plates are geometry, so their glints follow the lighting.
-  for (let i = 0; i < 420; i++) {
-    const direction = new Vector3(random() - 0.5, random() - 0.5, random() - 0.5).normalize();
-    const point = surface(direction).multiplyScalar(1.006);
-    const size = 0.015 + random() ** 2 * 0.065;
-    const geometry = new CylinderGeometry(size * 0.55, size * 0.6, 0.004 + random() * 0.005, 5).toNonIndexed();
-    rotation.setFromUnitVectors(UP, direction);
-    rotation.multiply(new Quaternion().setFromAxisAngle(UP, random() * Math.PI));
-    geometry.applyMatrix4(transform.compose(point, rotation, unitScale));
-    tintGeometry(geometry, new Color(i % 3 === 0 ? "#c6b397" : "#827975"), 0.2);
-    mica.push(geometry);
-  }
-
-  const geometries = [matrix, mergeParts(reds), mergeParts(quartz), mergeParts(mica)];
-  const materials = [matrixMaterial, crystalMaterial, quartzMaterial, micaMaterial];
+  const materials = [rockMaterial, crystalMaterial, greenMaterial];
   geometries.forEach((geometry, i) => {
     const mesh = new Mesh(geometry, materials[i]);
     mesh.castShadow = mesh.receiveShadow = true;
@@ -293,7 +145,10 @@ export function createMineral() {
 
   const center = new Box3().setFromObject(group).getCenter(new Vector3());
   group.children.forEach((child) => child.position.sub(center));
-  group.rotation.set(0.2, -0.35, -0.18);
+  group.rotation.set(0.24, -0.26, 0.26);
+  group.updateMatrixWorld(true);
+  // Centre again after rotating so the specimen sits in the middle of the frame.
+  group.position.sub(new Box3().setFromObject(group).getCenter(new Vector3()));
   group.updateMatrixWorld(true);
 
   // Fit the actual vertices, not the empty corners of a rotated bounding box.
@@ -309,11 +164,11 @@ export function createMineral() {
 
   return {
     group,
-    radius,
+    // The block is elongated; a tight sphere fit keeps it filling the frame.
+    radius: radius * 0.95,
     dispose() {
       geometries.forEach((geometry) => geometry.dispose());
       materials.forEach((material) => material.dispose());
-      grain.dispose();
     },
   };
 }

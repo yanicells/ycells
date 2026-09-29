@@ -1,5 +1,5 @@
 import {
-  ACESFilmicToneMapping,
+  NeutralToneMapping,
   Color,
   DirectionalLight,
   HemisphereLight,
@@ -10,32 +10,37 @@ import {
   PlaneGeometry,
   PMREMGenerator,
   Scene,
+  SpotLight,
   WebGLRenderer,
 } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { createMineral } from "./mineral";
 
-/** Small studio softboxes provide reflections without fetching a large HDR image. */
+/** Studio softboxes: enough bright shapes for glass to show crisp, believable reflections. */
 function createEnvironment(renderer: WebGLRenderer) {
   const studio = new Scene();
-  studio.background = new Color("#111318");
+  studio.background = new Color("#0b0c10");
   const geometry = new PlaneGeometry(1, 1);
-  const materials = [
-    new MeshBasicMaterial({ color: new Color().setRGB(6, 5.7, 5.3) }),
-    new MeshBasicMaterial({ color: new Color().setRGB(2, 2.3, 3) }),
+  const panels: { color: [number, number, number]; position: [number, number, number]; scale: [number, number] }[] = [
+    { color: [7, 6.6, 6], position: [-3, 4.5, 4], scale: [3.5, 5] },
+    { color: [2.2, 2.6, 3.4], position: [4.5, 1, -1.5], scale: [1.4, 6] },
+    { color: [3.6, 2.6, 2.1], position: [3.5, -2, 3.5], scale: [4, 1.2] },
+    { color: [5, 4.4, 4], position: [0, 6, -1], scale: [6, 2] },
+    { color: [1.6, 1.8, 2.4], position: [-5, -1, -1], scale: [1.2, 5] },
+    { color: [2.6, 1.7, 1.3], position: [0, -4, 1], scale: [7, 2] },
   ];
-  const softbox = new Mesh(geometry, materials[0]);
-  softbox.position.set(-3, 4, 4);
-  softbox.scale.set(3, 5, 1);
-  softbox.lookAt(0, 0, 0);
-  studio.add(softbox);
-  const strip = new Mesh(geometry, materials[1]);
-  strip.position.set(4, 1, -2);
-  strip.scale.set(1.5, 6, 1);
-  strip.lookAt(0, 0, 0);
-  studio.add(strip);
+  const materials = panels.map(
+    ({ color }) => new MeshBasicMaterial({ color: new Color().setRGB(...color) }),
+  );
+  panels.forEach(({ position, scale }, i) => {
+    const panel = new Mesh(geometry, materials[i]);
+    panel.position.set(...position);
+    panel.scale.set(scale[0], scale[1], 1);
+    panel.lookAt(0, 0, 0);
+    studio.add(panel);
+  });
   const generator = new PMREMGenerator(renderer);
-  const environment = generator.fromScene(studio, 0.04, 0.1, 30);
+  const environment = generator.fromScene(studio, 0.03, 0.1, 30);
   generator.dispose();
   geometry.dispose();
   materials.forEach((material) => material.dispose());
@@ -54,8 +59,8 @@ export function mountSpecimen(
     powerPreference: "low-power",
   });
   renderer.setClearColor(0x000000);
-  renderer.toneMapping = ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.15;
+  renderer.toneMapping = NeutralToneMapping;
+  renderer.toneMappingExposure = 1.12;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = PCFSoftShadowMap;
 
@@ -66,23 +71,22 @@ export function mountSpecimen(
   scene.add(mineral.group);
   let environment = createEnvironment(renderer);
   scene.environment = environment.texture;
-  scene.environmentIntensity = 0.65;
+  scene.environmentIntensity = 0.36;
 
-  const key = new DirectionalLight(0xffeee0, 3.6);
-  key.position.set(-3.5, 4.5, 5);
+  // A spotlight, not a directional light: it falls off across the specimen like a real studio lamp.
+  const key = new SpotLight(0xffe9d6, 300, 0, 0.42, 1, 2);
+  key.position.set(-5, 4, 3.6);
   key.castShadow = true;
-  key.shadow.mapSize.set(1024, 1024);
-  key.shadow.camera.left = key.shadow.camera.bottom = -2;
-  key.shadow.camera.right = key.shadow.camera.top = 2;
-  key.shadow.camera.near = 0.5;
-  key.shadow.camera.far = 15;
-  key.shadow.normalBias = 0.018;
+  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.camera.near = 3;
+  key.shadow.camera.far = 14;
+  key.shadow.normalBias = 0.02;
   key.shadow.bias = -0.0002;
-  const fill = new DirectionalLight(0xc5d6ee, 1.05);
+  const fill = new DirectionalLight(0xc5d6ee, 0.3);
   fill.position.set(3, 0.5, 3);
   const rim = new DirectionalLight(0xffc6ba, 2.2);
   rim.position.set(1, 3, -4);
-  scene.add(key, fill, rim, new HemisphereLight(0xd4d8ea, 0x2b211e, 0.6));
+  scene.add(key, key.target, fill, rim, new HemisphereLight(0xd4d8ea, 0x2b211e, 0.12));
 
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const controls = new OrbitControls(camera, canvas);
