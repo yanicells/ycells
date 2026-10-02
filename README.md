@@ -2,9 +2,9 @@
 
 A minimal directory for SimplifyTrabaho, UniSort, and airosu.
 
-The initial view shows only the three app names. Select one to see its logo and
-short description alongside the list. Click its logo to open the app, or click
-the selected name again to return to the initial view.
+About is the default view, with a short introduction beside the navigation.
+Select an app to see its supplied image and description. Links beneath each
+image open the app on its `ycells.com` subdomain or its GitHub repository.
 
 The dark palette, mineral background, and Hanken Grotesk font follow the header
 styling of the local `yanicells-dev` portfolio. App content lives in

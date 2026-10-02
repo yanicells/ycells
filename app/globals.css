@@ -99,8 +99,6 @@ a:focus-visible {
 }
 .app-directory {
   width: min(50vw, 720px);
-}
-.app-directory[data-selected="true"] {
   display: grid;
   grid-template-columns: max-content minmax(0, 1fr);
   align-items: center;
@@ -109,11 +107,8 @@ a:focus-visible {
 .app-list {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-.app-directory[data-selected="true"] .app-list {
   align-items: flex-start;
+  gap: 20px;
 }
 .app-list button {
   padding: 8px 0;
@@ -133,55 +128,39 @@ a:focus-visible {
   min-width: 0;
   animation: reveal 180ms ease-out;
 }
-.app-logo-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 120px;
-  margin-bottom: 24px;
+.app-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 3px;
+}
+.app-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin-block: 16px 24px;
+  font-size: 14px;
+}
+.app-links a {
+  text-decoration: underline;
+  text-decoration-color: #b3a5a550;
+  text-underline-offset: 4px;
+}
+.app-links a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
 }
 .app-details p {
   margin: 0;
   color: var(--muted);
   font-size: 15px;
   line-height: 1.7;
-  max-width: 340px;
 }
-.briefcase-logo {
-  display: block;
-  filter: invert(1);
-  mix-blend-mode: screen;
+.about-details p + p {
+  margin-top: 20px;
 }
-.unisort-logo {
-  font-family: Georgia, serif;
-  font-size: clamp(26px, 3.8vw, 44px);
-  font-style: italic;
-  font-weight: 900;
-  letter-spacing: -2.5px;
-}
-.unisort-logo span:nth-child(1) {
-  color: #536bcc;
-}
-.unisort-logo span:nth-child(2) {
-  color: #54a980;
-}
-.unisort-logo span:nth-child(3) {
-  color: #c56c78;
-}
-.unisort-logo span:nth-child(4) {
-  color: #e8b94b;
-}
-.airosu-logo {
-  width: 120px;
-  height: 120px;
-  display: grid;
-  place-items: center;
-  border: 5px solid #fff;
-  border-radius: 50%;
-  background: #ed63a2;
-  color: #fff;
-  font-size: 25px;
-  font-weight: 900;
-  letter-spacing: -1px;
+.about-details .app-links {
+  margin-bottom: 0;
 }
 @keyframes reveal {
   from {
@@ -202,8 +181,9 @@ a:focus-visible {
     inset: -20px -18vw 0 18vw;
     opacity: 0.65;
   }
-  .app-directory[data-selected="true"] {
-    gap: 24px;
+  .app-directory {
+    width: calc(100% - 40px);
+    gap: 20px;
   }
   .app-list {
     gap: 16px;
@@ -212,18 +192,9 @@ a:focus-visible {
     font-size: 16px;
     letter-spacing: -0.3px;
   }
-  .app-logo-link {
-    min-height: 100px;
-    margin-bottom: 20px;
-  }
-  .briefcase-logo,
-  .airosu-logo {
-    width: 100px;
-    height: 100px;
-  }
-  .airosu-logo {
-    font-size: 21px;
-    border-width: 4px;
+  .app-links {
+    gap: 12px 16px;
+    font-size: 13px;
   }
   .app-details p {
     font-size: 14px;
