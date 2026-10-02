@@ -1,35 +1,26 @@
-# Rb
+# ycells records
 
-A single interactive mineral specimen on black. No visible text or interface.
+A record collection for three independent projects: SimplifyTrabaho, UniSort, and
+airosu. Each project is an album, and its features are the tracks.
+
+Pick a sleeve to put its record on the turntable. Flip the sleeves to read their
+tracklists, select a track to explore a feature, and follow its link to the real
+project. The player includes play/pause, previous/next, and a seekable 30-second
+preview that advances through the feature tracks.
+
+Sound starts muted. The optional listening mode plays original synth loops made
+with Web Audio; it uses no song files or third-party samples. Playback pauses when
+the tab is hidden. Reduced motion disables record rotation and sleeve animations.
+On mobile, the collection becomes a shelf you can swipe through.
+
+## Development
 
 ```sh
 pnpm install
 pnpm dev
 ```
 
-Drag or swipe to rotate; scroll or pinch to zoom. Double-click to reset.
-Keyboard: focus the specimen with Tab, use arrow keys to rotate, `+` / `-`
-to zoom, and Home or Escape to reset.
-
-## Implementation
-
-Next.js, TypeScript, and Three.js. The specimen is generated locally with no
-downloaded models or textures: a fractured smoky-quartz block with iron-oxide
-staining, dark mica, a chalky pocket, translucent rubellite (pink tourmaline)
-prisms and olive-green crystals. It is an artistic interpretation of a
-rubidium-bearing mineral specimen, **not pure elemental rubidium**.
-
-- `rock.ts` carves the block from fracture planes, bakes cavity shading, and
-  computes broad colour per vertex.
-- `rockMaterial.ts` draws the fine detail per pixel in object space: cellular
-  mineral grains, feldspar flecks, sugary rust, and micro-relief bump.
-- `crystals.ts` builds the striated hexagonal prisms; `mineral.ts` assembles
-  and places them, and `scene.ts` sets up lighting and controls.
-
-The 3D engine loads separately from the page. Rendering runs on demand, pauses in
-hidden tabs, and caps the drawing-buffer resolution. Reduced motion disables
-inertia, animated lighting, and the entrance fade. A locally rendered poster
-remains available without JavaScript or WebGL.
+## Checks
 
 ```sh
 pnpm lint
@@ -37,22 +28,16 @@ pnpm exec tsc --noEmit
 pnpm build
 ```
 
-Reference: [rubidium's properties and occurrence](https://periodic-table.rsc.org/element/37/rubidium).
+## Artwork and content
 
-## Regenerating the poster
+The three original sleeve photographs were generated with the built-in imagegen
+tool and optimized as WebP files in `public/records/`. The exact prompts are in
+`scripts/record-artwork-prompts.json`.
 
-The checked-in poster (`public/specimen.webp`) is a 1000×1000 capture of the live
-scene, shown until WebGL is ready. Rebuild it after changing the model or camera:
+Project descriptions, feature tracks, and destinations are grounded in each
+project's local source. SimplifyTrabaho's briefcase mark is copied from its brand
+assets. UniSort's newspaper wordmark and airosu's pink cookie mark are adapted
+from their existing interfaces.
 
-```sh
-pnpm build && pnpm start -p 3112 &
-"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
-  --screenshot=/tmp/poster.png --window-size=1000,1000 --hide-scrollbars \
-  --virtual-time-budget=40000 --use-angle=swiftshader --enable-unsafe-swiftshader \
-  --ignore-gpu-blocklist http://localhost:3112
-```
-
-Then convert `/tmp/poster.png` to WebP (for example with Pillow:
-`Image.open(...).save("public/specimen.webp", "WEBP", quality=88)`).
-`scripts/export-specimen.ts` and `scripts/render-specimen.py` are the older Blender
-route; they do not reproduce the shader-based surface.
+The collection lives in `components/records/`. Album data is in `catalog.ts`,
+playback state is in `player-state.ts`, and original audio is in `sound.ts`.
