@@ -10,9 +10,9 @@ const apps = [
     url: "https://simplifytrabaho.ycells.com",
     github: "https://github.com/yanicells/simplifytrabaho",
     image: {
-      src: "/apps/simplifytrabaho.png",
-      width: 2200,
-      height: 1138,
+      src: "/apps/simplifytrabaho-banner.png",
+      width: 2012,
+      height: 836,
       alt: "SimplifyTrabaho's smiling briefcase logo and wordmark",
     },
     description:
