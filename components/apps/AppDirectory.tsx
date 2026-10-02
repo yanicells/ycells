@@ -24,7 +24,7 @@ const apps = [
     url: "https://unisort.ycells.com",
     github: "https://github.com/yanicells/unisort",
     image: {
-      src: "/apps/unisort.png",
+      src: "/apps/unisort-banner.png",
       width: 898,
       height: 391,
       alt: "UniSort's newspaper-style university sorting hat banner",
