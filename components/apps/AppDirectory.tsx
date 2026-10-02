@@ -25,9 +25,9 @@ const apps = [
     github: "https://github.com/yanicells/unisort",
     image: {
       src: "/apps/unisort.png",
-      width: 2062,
-      height: 1492,
-      alt: "UniSort's newspaper-style homepage and university match results",
+      width: 898,
+      height: 391,
+      alt: "UniSort's newspaper-style university sorting hat banner",
     },
     description:
       "A personality quiz to help you explore your fit among the Philippines' Big Four universities. Get a feel for each campus through student stories and a shared freedom wall. It's a playful way to imagine where you might feel at home.",
@@ -39,8 +39,8 @@ const apps = [
     github: "https://github.com/yanicells/airosu",
     image: {
       src: "/apps/airosu.png",
-      width: 2468,
-      height: 1404,
+      width: 2146,
+      height: 1170,
       alt: "airosu's pink logo and colorful rhythm game menu",
     },
     description:
