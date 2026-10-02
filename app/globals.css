@@ -1,6 +1,11 @@
 :root {
-  color-scheme: dark;
-  background: #000;
+  color-scheme: light;
+  --paper: #eeeff1;
+  --ink: #282b34;
+  --muted: #686c76;
+  --rule: #d8dade;
+  background: var(--paper);
+  color: var(--ink);
 }
 
 *,
@@ -8,75 +13,72 @@
 *::after {
   box-sizing: border-box;
 }
-
-html,
+html {
+  scroll-behavior: smooth;
+}
 body {
-  width: 100%;
-  height: 100%;
   margin: 0;
-  overflow: hidden;
-  overscroll-behavior: none;
-  background: #000;
+  font-family: var(--font-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
-
-.specimen-stage {
-  position: relative;
-  width: 100%;
-  height: 100svh;
-  height: 100dvh;
-  isolation: isolate;
+button,
+input {
+  font: inherit;
 }
-
-.specimen,
-.specimen-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.specimen-poster {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(100vw, 100svh);
-  height: min(100vw, 100svh);
-  transform: translate(-50%, -50%);
-  object-fit: contain;
-}
-
-.specimen-canvas {
-  display: block;
-  opacity: 0;
-  outline: none;
-  touch-action: none;
-  cursor: grab;
-  transition: opacity 700ms ease;
+button,
+a,
+input {
   -webkit-tap-highlight-color: transparent;
 }
-
-.specimen[data-ready="true"] .specimen-canvas {
-  opacity: 1;
+button {
+  color: inherit;
+  cursor: pointer;
 }
-
-.specimen[data-ready="true"] .specimen-poster {
-  visibility: hidden;
-  transition: visibility 0s 700ms;
+a {
+  color: inherit;
 }
-
-.specimen-canvas[data-dragging="true"] {
-  cursor: grabbing;
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid #3d667b;
+  outline-offset: 6px;
 }
-
-.specimen-canvas:focus-visible {
-  outline: 1px solid #766661;
-  outline-offset: -12px;
-  border-radius: 20px;
+::selection {
+  background: #bed3df;
+  color: #252b35;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip-link {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 100;
+  padding: 10px 15px;
+  background: white;
+  transform: translateY(-150%);
+}
+.skip-link:focus {
+  transform: translateY(0);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .specimen-canvas,
-  .specimen-poster {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
     transition: none !important;
   }
 }

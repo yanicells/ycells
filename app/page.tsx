@@ -1,9 +1,5 @@
-import Specimen from "@/components/specimen/Specimen";
+import RecordCollection from "@/components/records/RecordCollection";
 
 export default function Home() {
-  return (
-    <main className="specimen-stage" aria-label="Interactive mineral specimen">
-      <Specimen />
-    </main>
-  );
+  return <RecordCollection />;
 }
