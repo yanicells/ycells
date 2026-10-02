@@ -1,10 +1,20 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 
+const hankenGrotesk = Hanken_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-hanken",
+  display: "swap",
+});
+
+export const viewport: Viewport = { themeColor: "#171417" };
+
 export const metadata: Metadata = {
-  title: "Rb — ycells",
-  description: "A mineral specimen, in your hands.",
+  metadataBase: new URL("https://ycells.com"),
+  title: "ycells",
+  description: "Explore SimplifyTrabaho, UniSort, and airosu.",
   verification: {
     google: "eVLb2lTbuAz4-4MAUUSPkp9ZQe0rHc00MWOyB2LQccg",
   },
@@ -18,7 +28,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>
+      <body className={hankenGrotesk.variable}>
         {children}
         <Analytics />
       </body>

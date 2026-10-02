@@ -1,9 +1,11 @@
-import Specimen from "@/components/specimen/Specimen";
+import AppDirectory from "@/components/apps/AppDirectory";
+import { MineralBackdrop } from "@/components/apps/MineralBackdrop";
 
 export default function Home() {
   return (
-    <main className="specimen-stage" aria-label="Interactive mineral specimen">
-      <Specimen />
-    </main>
+    <div className="home-page">
+      <MineralBackdrop />
+      <AppDirectory />
+    </div>
   );
 }
