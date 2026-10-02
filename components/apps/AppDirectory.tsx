@@ -30,7 +30,7 @@ const apps = [
       alt: "UniSort's newspaper-style university sorting hat banner",
     },
     description:
-      "A personality quiz to help you explore your fit among the Philippines' Big Four universities. Get a feel for each campus through student stories and a shared freedom wall. It's a playful way to imagine where you might feel at home.",
+      "A personality quiz to help you explore your fit among the Philippines' Big Four universities. Get a feel for each campus through student stories and the freedom wall. It's a playful way to imagine where you might feel at home.",
   },
   {
     id: "airosu",
