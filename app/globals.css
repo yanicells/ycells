@@ -7,6 +7,8 @@
   --mineral-ruby: #a72c40;
   --mineral-copper: #a65d39;
   --mineral-stone: #928577;
+  --mineral-opacity: 1;
+  --mineral-glow: 0.34;
   background: var(--background);
   color: var(--foreground);
 }
@@ -58,9 +60,10 @@ a:focus-visible {
   isolation: isolate;
 }
 .mineral-backdrop {
-  position: fixed;
-  inset: 0;
+  position: absolute;
+  inset: 0 0 auto;
   z-index: -1;
+  height: 820px;
   overflow: hidden;
   pointer-events: none;
   mask-image: linear-gradient(#000 0%, #000 62%, transparent 100%);
@@ -68,7 +71,7 @@ a:focus-visible {
 .mineral-light {
   position: absolute;
   inset: 0;
-  opacity: 0.28;
+  opacity: var(--mineral-glow);
   background:
     radial-gradient(ellipse at 88% 22%, var(--mineral-ruby), transparent 46%),
     radial-gradient(ellipse at 65% 64%, var(--mineral-copper), transparent 43%),
@@ -76,8 +79,8 @@ a:focus-visible {
 }
 .mineral-planes {
   position: absolute;
-  inset: -20px -9vw 0 9vw;
-  opacity: 0.8;
+  inset: -20px 0 0;
+  opacity: var(--mineral-opacity);
 }
 .mineral-planes svg {
   display: block;
@@ -89,6 +92,34 @@ a:focus-visible {
   inset: 0;
   opacity: 0.045;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23888' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
+}
+/* Homepage entrance (~2.7s): the backdrop facets assemble into a small
+   crystal mark near the center of the first screen, hold, then unfold into
+   their resting places. The page content fades in as they settle.
+   --mark-x/y move the facets' centroid (1135, 460) to the SVG's center, in
+   viewBox units. */
+.mineral-crystal {
+  --mark-x: -415px;
+  --mark-y: 50px;
+}
+.mineral-facet {
+  transform-box: view-box;
+  transform-origin: 1135px 460px;
+  animation: mineral-unfold 2.4s both;
+  animation-delay: calc(var(--i) * 45ms);
+}
+.home-page .mineral-light {
+  animation: mineral-glow-arrive 2.5s ease-out backwards;
+}
+.home-page .site-shell {
+  animation: header-arrive 800ms ease-out 1.65s backwards;
+}
+.home-page .intro {
+  animation-delay: 1.65s;
+}
+/* Skip when landing on (or jumping to) a fragment. */
+body:has(:target) :is(.mineral-facet, .mineral-light, .site-shell, .intro) {
+  animation: none;
 }
 
 .app-stage {
@@ -180,10 +211,6 @@ a:focus-visible {
   }
 }
 @media (max-width: 580px) {
-  .mineral-planes {
-    inset: -20px -18vw 0 18vw;
-    opacity: 0.65;
-  }
   .app-directory {
     width: calc(100% - 40px);
     gap: 20px;
@@ -206,11 +233,66 @@ a:focus-visible {
     font-size: 14px;
   }
 }
+
+@media (max-width: 680px) {
+  .mineral-backdrop {
+    height: 740px;
+  }
+}
+
+@media (max-width: 540px) {
+  .mineral-backdrop {
+    height: 680px;
+  }
+  .mineral-crystal {
+    --mark-x: -364px;
+    --mark-y: 120px;
+  }
+  .mineral-planes {
+    inset-inline: -240px -160px;
+    --planes-strength: 0.6;
+    opacity: calc(var(--mineral-opacity) * var(--planes-strength));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+@keyframes header-arrive {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes mineral-unfold {
+  0% {
+    opacity: 0;
+    transform: translate(var(--mark-x), var(--mark-y)) scale(0.13)
+      rotate(-18deg);
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  42%,
+  56% {
+    opacity: 1;
+    transform: translate(var(--mark-x), var(--mark-y)) scale(0.22);
+    animation-timing-function: cubic-bezier(0.7, 0, 0.15, 1);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes mineral-glow-arrive {
+  0%,
+  55% {
+    opacity: 0;
   }
 }

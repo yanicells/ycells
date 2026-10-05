@@ -1,4 +1,11 @@
+import type { CSSProperties } from "react";
+
+// Stagger index for each facet's unfold animation.
+const facet = (i: number) => ({ "--i": i }) as CSSProperties;
+
 // Abstract mineral planes keep the supplied reference's color and depth.
+// On load the facets start folded into a small centered crystal mark, then
+// unfold into place as the backdrop (see `mineral-unfold` in globals.css).
 export function MineralBackdrop() {
   return (
     <div className="mineral-backdrop" aria-hidden="true">
@@ -86,32 +93,54 @@ export function MineralBackdrop() {
               />
             </linearGradient>
           </defs>
-          <path
-            d="M769 133 1135 58 1500 379 1160 568 900 425Z"
-            fill="url(#stone-face)"
-          />
-          <path
-            d="m1135 58 365 321-285 107-158-219Z"
-            fill="url(#copper-face)"
-          />
-          <path d="m1057 267 158 219-392 381 77-442Z" fill="url(#ruby-face)" />
-          <path d="m1215 486 285-107-40 395-637 93Z" fill="url(#copper-face)" />
-          <path
-            d="m900 425 157-158-288-134-161 408 215 326Z"
-            fill="url(#stone-face)"
-            opacity="0.52"
-          />
-          <path
-            d="m1057 267-157 158-77 442"
-            stroke="url(#mineral-seam)"
-            strokeWidth="1.25"
-          />
-          <path
-            d="m900 425 315 61 285-107"
-            stroke="url(#mineral-seam)"
-            strokeWidth="0.8"
-            opacity="0.6"
-          />
+          <g className="mineral-crystal">
+            <path
+              className="mineral-facet"
+              style={facet(0)}
+              d="M769 133 1135 58 1500 379 1160 568 900 425Z"
+              fill="url(#stone-face)"
+            />
+            <path
+              className="mineral-facet"
+              style={facet(1)}
+              d="m1135 58 365 321-285 107-158-219Z"
+              fill="url(#copper-face)"
+            />
+            <path
+              className="mineral-facet"
+              style={facet(2)}
+              d="m1057 267 158 219-392 381 77-442Z"
+              fill="url(#ruby-face)"
+            />
+            <path
+              className="mineral-facet"
+              style={facet(3)}
+              d="m1215 486 285-107-40 395-637 93Z"
+              fill="url(#copper-face)"
+            />
+            <path
+              className="mineral-facet"
+              style={facet(4)}
+              d="m900 425 157-158-288-134-161 408 215 326Z"
+              fill="url(#stone-face)"
+              fillOpacity="0.52"
+            />
+            <path
+              className="mineral-facet"
+              style={facet(5)}
+              d="m1057 267-157 158-77 442"
+              stroke="url(#mineral-seam)"
+              strokeWidth="1.25"
+            />
+            <path
+              className="mineral-facet"
+              style={facet(6)}
+              d="m900 425 315 61 285-107"
+              stroke="url(#mineral-seam)"
+              strokeWidth="0.8"
+              strokeOpacity="0.6"
+            />
+          </g>
         </svg>
       </div>
       <div className="mineral-grain" />
