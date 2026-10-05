@@ -5,7 +5,9 @@ export default function Home() {
   return (
     <div className="home-page">
       <MineralBackdrop />
-      <AppDirectory />
+      <div className="site-shell">
+        <AppDirectory />
+      </div>
     </div>
   );
 }
